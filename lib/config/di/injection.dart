@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
-import 'injection.config.dart';
+import 'package:mobile_pihome/config/di/injection.config.dart';
 
 final getIt = GetIt.instance;
 
@@ -9,8 +9,10 @@ final getIt = GetIt.instance;
   preferRelativeImports: true,
   asExtension: true,
 )
-GetIt configureDependencies() => getIt.init();
+void configureDependencies(String environment) {
+  getIt.init(environment: environment);
+}
 
 class Injectable {
-  void initialize() => configureDependencies();
+  void initialize([String env = 'dev']) => configureDependencies(env);
 }

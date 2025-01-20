@@ -17,9 +17,9 @@ final class ConfirmPasswordChanged extends AuthEvent {
   final String confirmPassword;
 }
 
-final class FullNameChanged extends AuthEvent {
-  const FullNameChanged(this.fullName);
-  final String fullName;
+final class NameChanged extends AuthEvent {
+  const NameChanged(this.name);
+  final String name;
 }
 
 final class LoginSubmitted extends AuthEvent {
@@ -33,13 +33,13 @@ final class CheckAuth extends AuthEvent {
 final class RegisterRequested extends AuthEvent {
   final String email;
   final String password;
-  final String fullName;
+  final String name;
 
   const RegisterRequested({
     required this.email,
     required this.password,
-    required this.fullName,
+    required this.name,
   });
 
-  List<Object?> get props => [email, password, fullName];
+  List<Object?> get props => [email, password, name,];
 }

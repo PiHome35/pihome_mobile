@@ -4,14 +4,14 @@ class RegisterModel extends RegisterEntity {
   const RegisterModel({
     required super.email,
     required super.password,
-    required super.username,
+    required super.name,
   });
 
   factory RegisterModel.fromJson(Map<String, dynamic> json) {
     return RegisterModel(
       email: json['email'] as String,
       password: json['password'] as String,
-      username: json['username'] as String,
+      name: json['name'] as String,
     );
   }
 
@@ -19,7 +19,7 @@ class RegisterModel extends RegisterEntity {
     return {
       'email': email,
       'password': password,
-      'username': username,
+      'name': name,
     };
   }
 }

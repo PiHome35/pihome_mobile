@@ -1,22 +1,31 @@
 import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/core/resources/data_state.dart';
+import 'package:mobile_pihome/core/usecase/usecase.dart';
+import 'package:mobile_pihome/features/authentication/domain/entities/token.dart';
 import '../repositories/auth_repositories.dart';
 
+class RegisterParams {
+  final String email;
+  final String password;
+  final String name;
+
+  RegisterParams(
+      {required this.email, required this.password, required this.name});
+}
+
 @injectable
-class RegisterUseCase {
+class RegisterUseCase
+    implements UseCase<DataState<TokenResponseEntity>, RegisterParams> {
   final AuthRepository repository;
 
   RegisterUseCase(this.repository);
 
-  Future<DataState<void>> call({
-    required String email,
-    required String password,
-    required String fullName,
-  }) async {
+  @override
+  Future<DataState<TokenResponseEntity>> execute(RegisterParams params) async {
     return await repository.registerUser(
-      email: email,
-      password: password,
-      fullName: fullName,
+      email: params.email,
+      password: params.password,
+      name: params.name,
     );
   }
 }

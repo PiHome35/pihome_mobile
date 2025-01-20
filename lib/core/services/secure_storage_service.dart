@@ -1,23 +1,56 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-// import 'package:injectable/injectable.dart';
+import 'package:mobile_pihome/core/primitive/primitive_database.dart';
+import 'package:mobile_pihome/core/primitive/primitive_keys.dart';
 
-// @lazySingleton
-class SecureStorageService {
+class SecureStorageService extends PrimitiveDataBase {
   final FlutterSecureStorage _storage;
+  SecureStorageService(this._storage);
 
-  SecureStorageService() : _storage = const FlutterSecureStorage();
-
-  static const String keyAccessToken = 'access_token';
-
-  Future<void> saveAccessToken(String token) async {
-    await _storage.write(key: keyAccessToken, value: token);
+  @override
+  Future<bool> delete(PrimitiveKeys key) async {
+    try {
+      await _storage.delete(key: key.name);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  Future<String?> getAccessToken() async {
-    return await _storage.read(key: keyAccessToken);
+  @override
+  Future<T?> read<T>(PrimitiveKeys key) async {
+    final response = await _storage.read(key: key.name);
+    if (response == null) {
+      return null;
+    }
+    return response.tryParse<T>();
   }
 
-  Future<void> deleteAccessToken() async {
-    await _storage.delete(key: keyAccessToken);
+  @override
+  Future<bool> write<T>(PrimitiveKeys key, {required T data}) async {
+    try {
+      await _storage.write(
+        key: key.name,
+        value: data.toString(),
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+}
+
+extension StringExtension on String {
+  T? tryParse<T>() {
+    try {
+      return switch (T) {
+        const (int) => int.parse(this) as T,
+        const (double) => double.parse(this) as T,
+        const (bool) => (toLowerCase() == 'true') as T,
+        const (String) => this as T,
+        _ => null,
+      };
+    } catch (e) {
+      return null;
+    }
   }
 }

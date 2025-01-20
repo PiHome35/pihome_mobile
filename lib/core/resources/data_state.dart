@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:mobile_pihome/core/graphql/graph_exception.dart';
 
 abstract class DataState<T> {
   final T? data;

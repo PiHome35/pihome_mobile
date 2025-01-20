@@ -50,6 +50,11 @@ dependencies:
   email_validator: ^3.0.0
   injectable_generator: ^2.6.2
   google_fonts: ^6.2.1
+  url_launcher: ^6.3.1
+  oauth2_client: ^3.3.0
+  flutter_web_auth_2: ^3.1.2
+  hive_generator: ^2.0.1
+  graphql_flutter: ^5.2.0-beta.8
 
 dev_dependencies:
   flutter_test:
@@ -62,9 +67,10 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
   build_runner: ^2.4.14
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+# dependency_overrides:
+#   analyzer: ^4.6.0
 
 # The following section is specific to Flutter packages.
 flutter:

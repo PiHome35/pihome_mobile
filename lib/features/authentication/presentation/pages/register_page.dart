@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_pihome/config/routes/routes.dart';
+import 'package:mobile_pihome/config/themes/text_styles.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -44,14 +44,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 SnackBar(
                   content: Text(
                     state.errorMessage ?? 'Registration failed',
-                    style: GoogleFonts.jetBrainsMono(),
+                    style: AppTextStyles.bodyMedium,
                   ),
                   backgroundColor: Colors.red[400],
                   behavior: SnackBarBehavior.floating,
                 ),
               );
           } else if (state.status.isSuccess) {
-            context.go(AppRoutes.success);
+            // context.go(AppRoutes.success);
+            context.go(AppRoutes.landing);
           }
         },
         builder: (context, state) {
@@ -67,33 +68,25 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       Text(
                         'Create Account',
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.headingLarge,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Please fill in the form to continue',
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
+                        style: AppTextStyles.subtitle,
                       ),
                       const SizedBox(height: 48),
                       TextFormField(
                         controller: _fullNameController,
-                        style: GoogleFonts.jetBrainsMono(),
+                        style: AppTextStyles.input,
                         decoration: InputDecoration(
                           labelText: 'Full Name',
-                          labelStyle: GoogleFonts.jetBrainsMono(),
+                          labelStyle: AppTextStyles.inputLabel,
                           hintText: 'Enter your full name',
-                          hintStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.grey),
+                          hintStyle: AppTextStyles.inputHint,
                           prefixIcon: const Icon(Icons.person_outline),
-                          errorStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.red),
-                          errorText: state.fullName.displayError?.message,
+                          errorStyle: AppTextStyles.error,
+                          errorText: state.name.displayError?.message,
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -111,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         onChanged: (value) {
-                          context.read<AuthBloc>().add(FullNameChanged(value));
+                          context.read<AuthBloc>().add(NameChanged(value));
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -123,17 +116,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _emailController,
-                        style: GoogleFonts.jetBrainsMono(),
+                        style: AppTextStyles.input,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          labelStyle: GoogleFonts.jetBrainsMono(),
+                          labelStyle: AppTextStyles.inputLabel,
                           hintText: 'Enter your email',
-                          hintStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.grey),
+                          hintStyle: AppTextStyles.inputHint,
                           prefixIcon: const Icon(Icons.email_outlined),
-                          errorStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.red),
+                          errorStyle: AppTextStyles.error,
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -167,17 +158,17 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _passwordController,
-                        style: GoogleFonts.jetBrainsMono(),
+                        style: AppTextStyles.input,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          labelStyle: GoogleFonts.jetBrainsMono(),
+                          labelStyle: AppTextStyles.inputLabel.copyWith(
+                            fontFamily: 'RobotoMono',
+                          ),
                           hintText: 'Enter your password',
-                          hintStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.grey),
+                          hintStyle: AppTextStyles.inputHint,
                           prefixIcon: const Icon(Icons.lock_outline),
-                          errorStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.red),
+                          errorStyle: AppTextStyles.error,
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -210,17 +201,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _confirmPasswordController,
-                        style: GoogleFonts.jetBrainsMono(),
+                        style: AppTextStyles.input,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
-                          labelStyle: GoogleFonts.jetBrainsMono(),
+                          labelStyle: AppTextStyles.inputLabel,
                           hintText: 'Confirm your password',
-                          hintStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.grey),
+                          hintStyle: AppTextStyles.inputHint,
                           prefixIcon: const Icon(Icons.lock_outline),
-                          errorStyle:
-                              GoogleFonts.jetBrainsMono(color: Colors.red),
+                          errorStyle: AppTextStyles.error,
                           errorText:
                               state.confirmPassword.displayError?.message,
                           filled: true,
@@ -259,7 +248,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           RegisterRequested(
                                             email: _emailController.text,
                                             password: _passwordController.text,
-                                            fullName: _fullNameController.text,
+                                            name: _fullNameController.text,
                                           ),
                                         );
                                   }
@@ -284,10 +273,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 )
                               : Text(
                                   'Create Account',
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: AppTextStyles.buttonLarge,
                                 ),
                         ),
                       ),
@@ -297,17 +283,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Text(
                             'Already have an account?',
-                            style: GoogleFonts.jetBrainsMono(
-                              color: Colors.grey[600],
-                            ),
+                            style: AppTextStyles.bodyMedium,
                           ),
                           TextButton(
                             onPressed: () => context.go(AppRoutes.login),
                             child: Text(
                               'Sign In',
-                              style: GoogleFonts.jetBrainsMono(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTextStyles.buttonMedium,
                             ),
                           ),
                         ],

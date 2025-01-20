@@ -1,9 +1,10 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_pihome/config/routes/routes.dart';
+import 'package:mobile_pihome/config/themes/text_styles.dart';
 import 'package:mobile_pihome/features/authentication/presentation/bloc/auth_event.dart';
 import 'package:mobile_pihome/features/authentication/presentation/bloc/auth_state.dart';
 import 'package:mobile_pihome/config/di/injection.dart';
@@ -53,7 +54,7 @@ class _LoginFormState extends State<LoginForm> {
               SnackBar(
                 content: Text(
                   state.errorMessage ?? 'Authentication Failure',
-                  style: GoogleFonts.jetBrainsMono(),
+                  style: AppTextStyles.error,
                 ),
                 backgroundColor: Colors.red[400],
                 behavior: SnackBarBehavior.floating,
@@ -74,18 +75,12 @@ class _LoginFormState extends State<LoginForm> {
               children: [
                 Text(
                   'Welcome back',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.headingLarge,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Please sign in to continue',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: AppTextStyles.subtitle,
                 ),
                 const SizedBox(height: 48),
                 _EmailInput(controller: _emailController),
@@ -99,7 +94,7 @@ class _LoginFormState extends State<LoginForm> {
                   children: [
                     Text(
                       'Don\'t have an account?',
-                      style: GoogleFonts.jetBrainsMono(
+                      style: AppTextStyles.bodyMedium.copyWith(
                         color: Colors.grey[600],
                       ),
                     ),
@@ -107,7 +102,7 @@ class _LoginFormState extends State<LoginForm> {
                       onPressed: () => context.push(AppRoutes.register),
                       child: Text(
                         'Register',
-                        style: GoogleFonts.jetBrainsMono(
+                        style: AppTextStyles.labelLarge.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -136,15 +131,15 @@ class _EmailInput extends StatelessWidget {
         return TextFormField(
           controller: controller,
           keyboardType: TextInputType.emailAddress,
-          style: GoogleFonts.jetBrainsMono(),
+          style: AppTextStyles.input,
           decoration: InputDecoration(
             labelText: 'Email',
-            labelStyle: GoogleFonts.jetBrainsMono(),
+            labelStyle: AppTextStyles.inputLabel,
             hintText: 'Enter your email',
-            hintStyle: GoogleFonts.jetBrainsMono(color: Colors.grey),
+            hintStyle: AppTextStyles.inputHint,
             prefixIcon: const Icon(Icons.email_outlined),
             errorText: state.email.displayError?.message,
-            errorStyle: GoogleFonts.jetBrainsMono(color: Colors.red),
+            errorStyle: AppTextStyles.error,
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
@@ -189,12 +184,12 @@ class _PasswordInputState extends State<_PasswordInput> {
         return TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
-          style: GoogleFonts.jetBrainsMono(),
+          style: AppTextStyles.input,
           decoration: InputDecoration(
             labelText: 'Password',
-            labelStyle: GoogleFonts.jetBrainsMono(),
+            labelStyle: AppTextStyles.inputLabel,
             hintText: 'Enter your password',
-            hintStyle: GoogleFonts.jetBrainsMono(color: Colors.grey),
+            hintStyle: AppTextStyles.inputHint,
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: IconButton(
               icon: Icon(
@@ -269,10 +264,7 @@ class _LoginButton extends StatelessWidget {
                   )
                 : Text(
                     'Sign In',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyles.buttonLarge,
                   ),
           ),
         );
