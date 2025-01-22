@@ -22,13 +22,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<DataState<TokenResponseEntity>> login({
     required String email,
     required String password,
-    required String accessToken,
   }) async {
     try {
       final response = await _remoteDataSource.login(
         email: email,
         password: password,
-        accessToken: accessToken,
       );
 
       // Save token to secure storage

@@ -11,7 +11,6 @@ abstract class AuthRemoteDataSource {
   Future<TokenModel> login({
     required String email,
     required String password,
-    required String accessToken,
   });
   Future<TokenModel> registerUser({
     required String email,
@@ -33,7 +32,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<TokenModel> login({
     required String email,
     required String password,
-    required String accessToken,
   }) async {
     log('email [login]: $email');
     log('password [login]: $password');
@@ -43,7 +41,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         options: Options(
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer {}',
           },
         ),
         data: {
@@ -51,8 +48,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'password': password,
         },
       );
-      log('response: ${response.data}');
-      log('response statusCode: ${response.statusCode}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         return TokenModel.fromJson(response.data!);
       } else {
@@ -84,12 +79,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'name': name,
         },
       );
-      log('response: ${response.data}');
-      log('response statusCode: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final tokenResponseJson = response.data!['login'];
-        final userResponseJson = response.data!['user'];
         return TokenModel.fromJson(tokenResponseJson);
       } else {
         throw ServerException();

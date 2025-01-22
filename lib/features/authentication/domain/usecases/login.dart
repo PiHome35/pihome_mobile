@@ -15,7 +15,6 @@ class LoginUseCase implements UseCase<DataState<TokenResponseEntity>, LoginParam
     return _authRepository.login(
       email: params.email,
       password: params.password,
-      accessToken: params.accessToken,
     );
   }
 }
@@ -23,11 +22,9 @@ class LoginUseCase implements UseCase<DataState<TokenResponseEntity>, LoginParam
 class LoginParams {
   final String email;
   final String password;
-  final String accessToken;
 
   LoginParams({
     required this.email,
     required this.password,
-    required this.accessToken,
   });
 }

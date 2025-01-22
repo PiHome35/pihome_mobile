@@ -26,7 +26,7 @@ class SpotifyAuthService {
     // No initialization needed
   }
 
-  Future<bool> authenticate() async {
+  Future<Map<String, dynamic>?> authenticate() async {
     try {
       final authUri = Uri.https(
         'accounts.spotify.com',
@@ -54,14 +54,14 @@ class SpotifyAuthService {
       }
 
       developer.log('No authorization code received');
-      return false;
+      return null;
     } catch (e) {
       developer.log('Error during Spotify authentication: $e');
-      return false;
+      return null;
     }
   }
 
-  Future<bool> _exchangeCodeForTokens(String code) async {
+  Future<Map<String, dynamic>?> _exchangeCodeForTokens(String code) async {
     try {
       final basicAuth = base64.encode(
         utf8.encode('$clientId:$clientSecret'),
@@ -93,12 +93,17 @@ class SpotifyAuthService {
           PrimitiveKeys.refreshTokenSpotify,
           data: tokens['refresh_token'],
         );
-        return true;
+
+        return {
+          'accessToken': tokens['access_token'],
+          'refreshToken': tokens['refresh_token'],
+          'expiresIn': tokens['expires_in'],
+        };
       }
-      return false;
+      return null;
     } catch (e) {
       developer.log('Error exchanging code for tokens: $e');
-      return false;
+      return null;
     }
   }
 
@@ -150,9 +155,12 @@ class SpotifyAuthService {
 
   Future<String?> getValidAccessToken() async {
     try {
-      final accessToken = await _secureStorage.read(PrimitiveKeys.accessTokenSpotify);
-      final refreshToken = await _secureStorage.read(PrimitiveKeys.refreshTokenSpotify);
-      final expiryString = await _secureStorage.read(PrimitiveKeys.refreshTokenSpotify);
+      final accessToken =
+          await _secureStorage.read(PrimitiveKeys.accessTokenSpotify);
+      final refreshToken =
+          await _secureStorage.read(PrimitiveKeys.refreshTokenSpotify);
+      final expiryString =
+          await _secureStorage.read(PrimitiveKeys.refreshTokenSpotify);
 
       if (accessToken == null || refreshToken == null || expiryString == null) {
         return null;

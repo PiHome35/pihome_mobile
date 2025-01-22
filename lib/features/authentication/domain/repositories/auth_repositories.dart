@@ -7,7 +7,6 @@ abstract class AuthRepository {
   Future<DataState<TokenResponseEntity>> login({
     required String email,
     required String password,
-    required String accessToken,
   });
 
   Future<DataState<bool>> checkAuth();

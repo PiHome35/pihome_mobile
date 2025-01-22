@@ -37,10 +37,13 @@ class _ChatPageState extends State<ChatPage> {
       child: BlocConsumer<UserLocalBloc, UserLocalState>(
         listener: (context, state) {
           if (state is UserLocalLoaded) {
-            context.read<ChatBloc>().add(GetAllChats(
-                  familyId: state.user.familyId!,
-                  limit: 25,
-                ));
+            final familyId = state.user.familyId;
+            if (familyId != null) {
+              context.read<ChatBloc>().add(GetAllChats(
+                    familyId: familyId,
+                    limit: 25,
+                  ));
+            }
           }
         },
         builder: (context, state) {
@@ -52,8 +55,18 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                AppRoutes.navigateToCreateChatRoom(context);
+              onPressed: () async {
+                final result =
+                    await AppRoutes.navigateToCreateChatRoom(context);
+                if (result && context.mounted) {
+                  final userState = context.read<UserLocalBloc>().state;
+                  if (userState is UserLocalLoaded) {
+                    context.read<ChatBloc>().add(GetAllChats(
+                          familyId: userState.user.familyId!,
+                          limit: 25,
+                        ));
+                  }
+                }
               },
               child: const Icon(Icons.add_comment_rounded),
             ),
@@ -61,10 +74,15 @@ class _ChatPageState extends State<ChatPage> {
               onRefresh: () async {
                 final userState = context.read<UserLocalBloc>().state;
                 if (userState is UserLocalLoaded) {
-                  context.read<ChatBloc>().add(GetAllChats(
-                        familyId: userState.user.familyId!,
-                        limit: 25,
-                      ));
+                  final familyId = userState.user.familyId;
+                  if (familyId != null) {
+                    context.read<ChatBloc>().add(GetAllChats(
+                          familyId: familyId,
+                          limit: 25,
+                        ));
+                  } else {
+                    log('No family id');
+                  }
                 }
               },
               child: BlocBuilder<ChatBloc, ChatState>(
@@ -81,10 +99,13 @@ class _ChatPageState extends State<ChatPage> {
                         onRetry: () {
                           final userState = context.read<UserLocalBloc>().state;
                           if (userState is UserLocalLoaded) {
-                            context.read<ChatBloc>().add(GetAllChats(
-                                  familyId: userState.user.familyId!,
-                                  limit: 25,
-                                ));
+                            final familyId = userState.user.familyId;
+                            if (familyId != null) {
+                              context.read<ChatBloc>().add(GetAllChats(
+                                    familyId: familyId,
+                                    limit: 25,
+                                  ));
+                            }
                           }
                         },
                       ),
@@ -103,11 +124,19 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildChatList(List<ChatEntity> chats) {
     if (chats.isEmpty) {
-      return Center(
-        child: Text(
-          'No chats yet',
-          style: AppTextStyles.bodyLarge,
-        ),
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: Center(
+              child: Text(
+                'No chats yet',
+                style: AppTextStyles.bodyLarge,
+              ),
+            ),
+          ),
+        ],
       );
     }
 

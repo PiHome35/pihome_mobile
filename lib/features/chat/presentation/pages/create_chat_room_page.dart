@@ -1,10 +1,8 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_pihome/config/di/injection.dart';
-import 'package:mobile_pihome/config/routes/routes.dart';
 import 'package:mobile_pihome/config/themes/text_styles.dart';
 import 'package:mobile_pihome/core/presentation/bloc/local/user_local_bloc.dart';
 import 'package:mobile_pihome/core/presentation/bloc/local/user_local_event.dart';
@@ -56,7 +54,7 @@ class _CreateChatRoomPageState extends State<CreateChatRoomPage> {
         body: BlocConsumer<ChatBloc, ChatState>(
           listener: (context, state) {
             if (state is ChatCreated) {
-              context.pop();
+              context.pop(true);
             }
           },
           builder: (context, state) {

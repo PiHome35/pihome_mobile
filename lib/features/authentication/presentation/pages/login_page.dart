@@ -62,7 +62,7 @@ class _LoginFormState extends State<LoginForm> {
             );
         }
         if (state.status.isSuccess) {
-          context.go(AppRoutes.success);
+          context.go(AppRoutes.loading);
         }
       },
       child: SafeArea(

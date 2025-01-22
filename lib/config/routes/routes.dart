@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile_pihome/config/di/injection.dart';
-import 'package:mobile_pihome/core/presentation/bloc/local/user_local_bloc.dart';
 import 'package:mobile_pihome/features/authentication/presentation/pages/login_page.dart';
 import 'package:mobile_pihome/features/authentication/presentation/pages/register_page.dart';
 import 'package:mobile_pihome/features/authentication/presentation/pages/splash_page.dart';
 import 'package:mobile_pihome/features/chat/domain/entities/message.dart';
-import 'package:mobile_pihome/features/chat/presentation/bloc/chat_bloc.dart';
-import 'package:mobile_pihome/features/chat/presentation/bloc/chat_event.dart';
 import 'package:mobile_pihome/features/chat/presentation/pages/chat_room_page.dart';
 import 'package:mobile_pihome/features/chat/presentation/pages/create_chat_room_page.dart';
 import 'package:mobile_pihome/features/device/presentation/pages/device_group_page.dart';
 import 'package:mobile_pihome/features/family/presentation/pages/create_family_page.dart';
+import 'package:mobile_pihome/features/family/presentation/pages/family_settings_page.dart';
 import 'package:mobile_pihome/features/landing/presentation/pages/landing_page.dart';
 import 'package:mobile_pihome/features/loading/presentation/pages/loading_page.dart';
-import 'package:mobile_pihome/success_login.dart';
 import 'package:mobile_pihome/features/chat/presentation/pages/chat_page.dart';
 import 'package:mobile_pihome/features/family/presentation/pages/join_family_page.dart';
+import 'dart:async';
 
 class AppRoutes {
   static const splash = '/';
@@ -35,7 +31,7 @@ class AppRoutes {
   static const loading = '/loading';
   static const chatRoom = '/chat/:chatId';
   static const joinFamily = '/join-family';
-
+  static const familySettings = '/family-settings';
   static final router = GoRouter(
     initialLocation: splash,
     routes: <RouteBase>[
@@ -50,10 +46,6 @@ class AppRoutes {
       GoRoute(
         path: register,
         builder: (context, state) => const RegisterPage(),
-      ),
-      GoRoute(
-        path: success,
-        builder: (context, state) => const LoginSuccess(),
       ),
       GoRoute(
         path: createFamily,
@@ -90,8 +82,16 @@ class AppRoutes {
         path: joinFamily,
         builder: (context, state) => const JoinFamilyPage(),
       ),
+      GoRoute(
+        path: familySettings,
+        builder: (context, state) => const FamilySettingsPage(),
+      ),
     ],
   );
+
+  static void navigateToFamilySettings(BuildContext context) {
+    context.push(familySettings);
+  }
 
   static void navigateToChatRoom(
     BuildContext context,
@@ -108,7 +108,7 @@ class AppRoutes {
     );
   }
 
-  static void navigateToCreateChatRoom(BuildContext context) {
-    context.push(createChatRoom);
+  static Future<bool> navigateToCreateChatRoom(BuildContext context) {
+    return context.push<bool>(createChatRoom).then((value) => value ?? false);
   }
 }

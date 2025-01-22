@@ -4,7 +4,6 @@ class SpotifyConnectionModel extends SpotifyConnectionEntity {
   const SpotifyConnectionModel({
     required super.accessToken,
     required super.refreshToken,
-    required super.expiresIn,
     required super.spotifyDeviceId,
     required super.familyId,
     required super.createdAt,
@@ -15,7 +14,6 @@ class SpotifyConnectionModel extends SpotifyConnectionEntity {
     return SpotifyConnectionModel(
       accessToken: json['accessToken'],
       refreshToken: json['refreshToken'],
-      expiresIn: json['expiresIn'],
       spotifyDeviceId: json['spotifyDeviceId'],
       familyId: json['familyId'],
       createdAt: json['createdAt'],
@@ -27,7 +25,6 @@ class SpotifyConnectionModel extends SpotifyConnectionEntity {
     return {
       'accessToken': accessToken,
       'refreshToken': refreshToken,
-      'expiresIn': expiresIn,
       'spotifyDeviceId': spotifyDeviceId,
       'familyId': familyId,
       'createdAt': createdAt,
@@ -39,7 +36,6 @@ class SpotifyConnectionModel extends SpotifyConnectionEntity {
     return SpotifyConnectionModel(
       accessToken: entity.accessToken,
       refreshToken: entity.refreshToken,
-      expiresIn: entity.expiresIn,
       spotifyDeviceId: entity.spotifyDeviceId,
       familyId: entity.familyId,
       createdAt: entity.createdAt,
@@ -51,11 +47,21 @@ class SpotifyConnectionModel extends SpotifyConnectionEntity {
     return SpotifyConnectionEntity(
       accessToken: accessToken,
       refreshToken: refreshToken,
-      expiresIn: expiresIn,
       spotifyDeviceId: spotifyDeviceId,
       familyId: familyId,
       createdAt: createdAt,
       updatedAt: updatedAt,
+    );
+  }
+
+  static SpotifyConnectionModel empty() {
+    return const SpotifyConnectionModel(
+      accessToken: '',
+      refreshToken: '',
+      spotifyDeviceId: '',
+      familyId: '',
+      createdAt: '',
+      updatedAt: '',
     );
   }
 }

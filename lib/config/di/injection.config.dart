@@ -37,6 +37,7 @@ import '../../features/authentication/domain/usecases/get_me.dart' as _i951;
 import '../../features/authentication/domain/usecases/get_storage_token.dart'
     as _i295;
 import '../../features/authentication/domain/usecases/login.dart' as _i831;
+import '../../features/authentication/domain/usecases/logout.dart' as _i943;
 import '../../features/authentication/domain/usecases/register.dart' as _i1009;
 import '../../features/authentication/domain/usecases/storage_token.dart'
     as _i731;
@@ -98,22 +99,36 @@ import '../../features/family/data/repositories/family_repository_impl.dart'
 import '../../features/family/domain/repositories/family_repository.dart'
     as _i797;
 import '../../features/family/domain/usecases/create_family.dart' as _i311;
+import '../../features/family/domain/usecases/create_invite_code.dart' as _i779;
+import '../../features/family/domain/usecases/delete_invite_code.dart' as _i325;
+import '../../features/family/domain/usecases/get_family_detail.dart' as _i681;
 import '../../features/family/domain/usecases/join_family.dart' as _i677;
+import '../../features/family/domain/usecases/list_user_family.dart' as _i315;
 import '../../features/family/presentation/bloc/family_bloc.dart' as _i160;
+import '../../features/family/presentation/bloc/family_setting/family_setting_bloc.dart'
+    as _i411;
 import '../../features/landing/presentation/bloc/landing_bloc.dart' as _i876;
+import '../../features/loading/domain/usecases/cache_setting.dart' as _i611;
+import '../../features/loading/domain/usecases/get_spotify_connect.dart'
+    as _i74;
 import '../../features/loading/domain/usecases/loading_user.dart' as _i933;
 import '../../features/loading/presentation/bloc/loading_remote_bloc.dart'
     as _i111;
-import '../../features/setting/data/datasources/mock/setting_mock_datasource.dart'
-    as _i476;
+import '../../features/setting/data/datasources/setting_local_datasource.dart'
+    as _i508;
+import '../../features/setting/data/datasources/setting_remote_datasource.dart'
+    as _i429;
 import '../../features/setting/data/repositories/setting_repository_impl.dart'
     as _i182;
 import '../../features/setting/domain/repositories/setting_repository.dart'
     as _i819;
 import '../../features/setting/domain/usecases/connect_spotify_account.dart'
     as _i382;
-import '../../features/setting/domain/usecases/get_setting.dart' as _i364;
-import '../../features/setting/domain/usecases/update_setting.dart' as _i98;
+import '../../features/setting/domain/usecases/create_spotify_connection.dart'
+    as _i1015;
+import '../../features/setting/domain/usecases/get_cache_setting.dart' as _i908;
+import '../../features/setting/domain/usecases/logout_spotify_connect.dart'
+    as _i643;
 import '../../features/setting/presentation/bloc/setting_bloc.dart' as _i941;
 import 'register_module.dart' as _i291;
 
@@ -145,12 +160,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i115.UserRemoteDataSource>(
         () => _i115.UserRemoteDataSourceImpl(gh<_i361.Dio>()));
-    gh.lazySingleton<_i476.SettingMockDatasource>(
-      () => _i476.SettingMockDataSourceImpl(),
-      registerFor: {_mock},
-    );
-    gh.factory<_i382.ConnectSpotifyAccountUseCase>(() =>
-        _i382.ConnectSpotifyAccountUseCase(gh<_i545.SpotifyAuthService>()));
     gh.lazySingleton<_i159.IChatRemoteDataSource>(
         () => registerModule.chatRemoteDataSource);
     gh.lazySingleton<_i590.DeviceDatasource>(
@@ -167,8 +176,12 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i746.TokenLocalDataSource(gh<_i814.SecureStorageService>()));
     gh.lazySingleton<_i682.FamilyRemoteDataSource>(
         () => _i682.FamilyRemoteDataSourceImpl(gh<_i361.Dio>()));
+    gh.lazySingleton<_i429.SettingRemoteDataSource>(
+        () => _i429.SettingRemoteDataSourceImpl(gh<_i361.Dio>()));
     gh.lazySingleton<_i563.DeviceLocalDataSource>(
         () => registerModule.deviceLocalDataSource);
+    gh.factory<_i943.LogoutUseCase>(
+        () => _i943.LogoutUseCase(gh<_i746.TokenLocalDataSource>()));
     gh.lazySingleton<_i985.DeviceRepository>(
       () => _i740.DeviceRepositoryImpl(
         gh<_i590.DeviceDatasource>(),
@@ -188,8 +201,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i504.ChatRepositoryImpl(gh<_i159.IChatRemoteDataSource>()));
     gh.lazySingleton<_i797.FamilyRepository>(
         () => _i590.FamilyRepositoryImpl(gh<_i682.FamilyRemoteDataSource>()));
-    gh.lazySingleton<_i819.SettingRepository>(
-        () => _i182.SettingRepositoryImpl(gh<_i476.SettingMockDatasource>()));
+    gh.lazySingleton<_i508.SettingLocalDataSource>(
+        () => _i508.SettingLocalDataSourceImpl(gh<_i720.HiveManager>()));
     gh.factory<_i167.GetChatMessagesUseCase>(
         () => _i167.GetChatMessagesUseCase(gh<_i420.IChatRepository>()));
     gh.factory<_i1005.GetAllChatsUseCase>(
@@ -210,8 +223,19 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i163.CacheUserUseCase(gh<_i389.UserRepository>()));
     gh.factory<_i677.JoinFamilyUseCase>(
         () => _i677.JoinFamilyUseCase(gh<_i797.FamilyRepository>()));
+    gh.factory<_i779.CreateInviteCodeUseCase>(
+        () => _i779.CreateInviteCodeUseCase(gh<_i797.FamilyRepository>()));
+    gh.factory<_i315.ListUserFamilyUseCase>(
+        () => _i315.ListUserFamilyUseCase(gh<_i797.FamilyRepository>()));
+    gh.factory<_i681.GetFamilyDetailUseCase>(
+        () => _i681.GetFamilyDetailUseCase(gh<_i797.FamilyRepository>()));
     gh.factory<_i613.UserLocalBloc>(
         () => _i613.UserLocalBloc(gh<_i823.GetCachedUserUseCase>()));
+    gh.lazySingleton<_i819.SettingRepository>(() => _i182.SettingRepositoryImpl(
+          gh<_i545.SpotifyAuthService>(),
+          gh<_i429.SettingRemoteDataSource>(),
+          gh<_i508.SettingLocalDataSource>(),
+        ));
     gh.factory<_i498.FetchDeviceUseCase>(
         () => _i498.FetchDeviceUseCase(gh<_i985.DeviceRepository>()));
     gh.lazySingleton<_i775.UpdateCachedDeviceUseCase>(
@@ -220,16 +244,18 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i240.CacheDevicesUseCase(gh<_i985.DeviceRepository>()));
     gh.lazySingleton<_i86.GetCachedDevicesUseCase>(
         () => _i86.GetCachedDevicesUseCase(gh<_i985.DeviceRepository>()));
-    gh.factory<_i364.GetSettingUseCase>(
-        () => _i364.GetSettingUseCase(gh<_i819.SettingRepository>()));
-    gh.factory<_i98.UpdateSettingUseCase>(
-        () => _i98.UpdateSettingUseCase(gh<_i819.SettingRepository>()));
+    gh.factory<_i1015.CreateSpotifyConnectionUseCase>(() =>
+        _i1015.CreateSpotifyConnectionUseCase(gh<_i819.SettingRepository>()));
+    gh.factory<_i643.LogoutSpotifyConnectUseCase>(
+        () => _i643.LogoutSpotifyConnectUseCase(gh<_i819.SettingRepository>()));
     gh.factory<_i157.CreateNewChatUseCase>(
         () => _i157.CreateNewChatUseCase(gh<_i420.IChatRepository>()));
     gh.factory<_i172.SubscribeToMessagesUseCase>(
         () => _i172.SubscribeToMessagesUseCase(gh<_i420.IChatRepository>()));
     gh.factory<_i976.GetAllChatsUseCase>(
         () => _i976.GetAllChatsUseCase(gh<_i420.IChatRepository>()));
+    gh.factory<_i325.DeleteInviteCodeUseCase>(
+        () => _i325.DeleteInviteCodeUseCase(gh<_i797.FamilyRepository>()));
     gh.factory<_i69.GetDeviceGroupUseCase>(
         () => _i69.GetDeviceGroupUseCase(gh<_i932.IDeviceGroupRepository>()));
     gh.factory<_i350.DeleteDeviceGroupUseCase>(() =>
@@ -244,6 +270,14 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i311.CreateFamilyUseCase(gh<_i797.FamilyRepository>()));
     gh.factory<_i1009.RegisterUseCase>(
         () => _i1009.RegisterUseCase(gh<_i1017.AuthRepository>()));
+    gh.factory<_i382.ConnectSpotifyAccountUseCase>(() =>
+        _i382.ConnectSpotifyAccountUseCase(gh<_i819.SettingRepository>()));
+    gh.factory<_i74.GetSpotifyConnectUseCase>(
+        () => _i74.GetSpotifyConnectUseCase(gh<_i819.SettingRepository>()));
+    gh.factory<_i611.CacheSettingUseCase>(
+        () => _i611.CacheSettingUseCase(gh<_i819.SettingRepository>()));
+    gh.factory<_i908.GetCachedSettingUseCase>(
+        () => _i908.GetCachedSettingUseCase(gh<_i819.SettingRepository>()));
     gh.factory<_i72.LocalDeviceBloc>(() => _i72.LocalDeviceBloc(
           gh<_i240.CacheDevicesUseCase>(),
           gh<_i86.GetCachedDevicesUseCase>(),
@@ -259,11 +293,6 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i491.CheckAuthUseCase(gh<_i1017.AuthRepository>()));
     gh.factory<_i951.GetMeUseCase>(
         () => _i951.GetMeUseCase(gh<_i1017.AuthRepository>()));
-    gh.factory<_i111.LoadingRemoteBloc>(() => _i111.LoadingRemoteBloc(
-          gh<_i295.GetStorageTokenUseCase>(),
-          gh<_i297.GetUserUseCase>(),
-          gh<_i163.CacheUserUseCase>(),
-        ));
     gh.factory<_i160.FamilyBloc>(() => _i160.FamilyBloc(
           gh<_i311.CreateFamilyUseCase>(),
           gh<_i295.GetStorageTokenUseCase>(),
@@ -271,6 +300,13 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i1022.DeviceBloc>(
         () => _i1022.DeviceBloc(gh<_i498.FetchDeviceUseCase>()));
+    gh.factory<_i411.FamilySettingBloc>(() => _i411.FamilySettingBloc(
+          gh<_i779.CreateInviteCodeUseCase>(),
+          gh<_i325.DeleteInviteCodeUseCase>(),
+          gh<_i295.GetStorageTokenUseCase>(),
+          gh<_i315.ListUserFamilyUseCase>(),
+          gh<_i681.GetFamilyDetailUseCase>(),
+        ));
     gh.factory<_i918.DeviceGroupBloc>(() => _i918.DeviceGroupBloc(
           gh<_i53.GetDeviceGroupsUseCase>(),
           gh<_i675.CreateDeviceGroupUseCase>(),
@@ -284,11 +320,21 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i731.StorageTokenUseCase>(),
           gh<_i1009.RegisterUseCase>(),
           gh<_i295.GetStorageTokenUseCase>(),
+          gh<_i943.LogoutUseCase>(),
+        ));
+    gh.factory<_i111.LoadingRemoteBloc>(() => _i111.LoadingRemoteBloc(
+          gh<_i295.GetStorageTokenUseCase>(),
+          gh<_i297.GetUserUseCase>(),
+          gh<_i163.CacheUserUseCase>(),
+          gh<_i74.GetSpotifyConnectUseCase>(),
+          gh<_i681.GetFamilyDetailUseCase>(),
+          gh<_i611.CacheSettingUseCase>(),
         ));
     gh.factory<_i941.SettingBloc>(() => _i941.SettingBloc(
-          gh<_i364.GetSettingUseCase>(),
-          gh<_i98.UpdateSettingUseCase>(),
+          gh<_i295.GetStorageTokenUseCase>(),
+          gh<_i1015.CreateSpotifyConnectionUseCase>(),
           gh<_i823.GetCachedUserUseCase>(),
+          gh<_i908.GetCachedSettingUseCase>(),
         ));
     gh.factory<_i65.ChatBloc>(() => _i65.ChatBloc(
           gh<_i295.GetStorageTokenUseCase>(),

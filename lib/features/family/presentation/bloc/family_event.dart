@@ -15,3 +15,4 @@ final class JoinFamilySubmitted extends FamilyEvent {
   const JoinFamilySubmitted({required this.inviteCode});
   final String inviteCode;
 }
+

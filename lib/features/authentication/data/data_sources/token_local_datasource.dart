@@ -26,4 +26,11 @@ class TokenLocalDataSource {
     }
     log('[write] token: $token');
   }
+
+  Future<void> deleteToken() async {
+    final bool isSuccess = await _secureStorage.delete(PrimitiveKeys.accessToken);
+    if (!isSuccess) {
+      throw Exception('Failed to delete token from secure storage');
+    }
+  }
 }

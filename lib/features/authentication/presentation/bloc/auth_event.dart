@@ -43,3 +43,7 @@ final class RegisterRequested extends AuthEvent {
 
   List<Object?> get props => [email, password, name,];
 }
+
+final class LogoutEvent extends AuthEvent {
+  const LogoutEvent();
+}

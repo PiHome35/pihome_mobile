@@ -6,12 +6,27 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_pihome/config/di/injection.dart';
 import 'package:mobile_pihome/config/routes/routes.dart';
 import 'package:mobile_pihome/config/themes/text_styles.dart';
+import 'package:mobile_pihome/core/widgets/minimal_dialog.dart';
 import 'package:mobile_pihome/features/loading/presentation/bloc/loading_remote_bloc.dart';
 import 'package:mobile_pihome/features/loading/presentation/bloc/loading_remote_event.dart';
 import 'package:mobile_pihome/features/loading/presentation/bloc/loading_remote_state.dart';
 
 class LoadingPage extends StatelessWidget {
   const LoadingPage({super.key});
+
+  void _showErrorDialog(BuildContext context, String message) {
+    MinimalDialog.show(
+      context: context,
+      title: 'Error',
+      message: message,
+      primaryButtonText: 'OK',
+      type: DialogType.error,
+      onPrimaryPressed: () {
+        Navigator.pop(context);
+        context.go(AppRoutes.login);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +35,24 @@ class LoadingPage extends StatelessWidget {
         getIt(),
         getIt(),
         getIt(),
-      )..add(const LoadUserData()),
+        getIt(),
+        getIt(),
+        getIt(),
+      )
+        ..add(const LoadUserData())
+        // ..add(const LoadSpotifyConnect())
+        ..add(const LoadSetting()),
       child: BlocListener<LoadingRemoteBloc, LoadingRemoteState>(
         listener: (context, state) {
-          log('state: $state');
-          if (state is LoadingRemoteSuccess) {
-            if (state.user.familyId != null) {
-              context.go(AppRoutes.landing);
-            } else {
-              context.go(AppRoutes.createFamily);
-            }
+          if (state is LoadingRemoteSettingSuccess &&
+              state.setting.familyName!.isNotEmpty) {
+            log('state LoadingRemoteState: ${state.setting}');
+            context.go(AppRoutes.landing);
+          } else if (state is LoadingRemoteSettingSuccess &&
+              state.setting.familyName!.isEmpty) {
+            context.go(AppRoutes.createFamily);
           } else if (state is LoadingRemoteError) {
-            context.go(AppRoutes.login);
+            _showErrorDialog(context, state.message);
           }
         },
         child: Scaffold(
@@ -85,6 +106,9 @@ class LoadingPageProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => LoadingRemoteBloc(
+        getIt(),
+        getIt(),
+        getIt(),
         getIt(),
         getIt(),
         getIt(),

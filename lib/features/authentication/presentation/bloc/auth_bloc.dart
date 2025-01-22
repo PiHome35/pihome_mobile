@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/core/resources/data_state.dart';
+import 'package:mobile_pihome/core/usecase/usecase.dart';
 import 'package:mobile_pihome/core/validations/confirm_password.dart';
 import 'package:mobile_pihome/core/validations/email.dart';
 import 'package:mobile_pihome/core/validations/name.dart';
@@ -10,6 +11,7 @@ import 'package:mobile_pihome/core/validations/password.dart';
 import 'package:mobile_pihome/features/authentication/domain/usecases/check_auth.dart';
 import 'package:mobile_pihome/features/authentication/domain/usecases/get_storage_token.dart';
 import 'package:mobile_pihome/features/authentication/domain/usecases/login.dart';
+import 'package:mobile_pihome/features/authentication/domain/usecases/logout.dart';
 import 'package:mobile_pihome/features/authentication/domain/usecases/storage_token.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -22,13 +24,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final StorageTokenUseCase _storageTokenUseCase;
   final GetStorageTokenUseCase _getStorageTokenUseCase;
   final RegisterUseCase _register;
-
+  final LogoutUseCase _logoutUseCase;
   AuthBloc(
     this._loginUseCase,
     this._checkAuthUseCase,
     this._storageTokenUseCase,
     this._register,
     this._getStorageTokenUseCase,
+    this._logoutUseCase,
   ) : super(const AuthState()) {
     on<EmailChanged>(_onEmailChanged);
     on<PasswordChanged>(_onPasswordChanged);
@@ -37,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginSubmitted>(_onLoginSubmitted);
     on<CheckAuth>(_onCheckAuth);
     on<RegisterRequested>(_onRegisterRequested);
+    on<LogoutEvent>(_onLogout);
   }
   
   void _onEmailChanged(
@@ -110,14 +114,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     log('state is valid: ${state.isValid}');
     if (!state.isValid) return;
 
-    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
-    final accessToken = await _getStorageTokenUseCase.execute();
     try {
       final dataState = await _loginUseCase.execute(
         LoginParams(
           email: state.email.value,
           password: state.password.value,
-          accessToken: accessToken,
         ),
       );
       log('dataState [login]: $dataState');
@@ -192,6 +193,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(state.copyWith(status: FormzSubmissionStatus.failure));
     }
+  }
+
+  Future<void> _onLogout(
+    LogoutEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    log('logout..');
+    await _logoutUseCase.execute(const NoParams());
+    emit(state.copyWith(status: FormzSubmissionStatus.initial));
+    log('logout success');
   }
 
   bool _validateFields({

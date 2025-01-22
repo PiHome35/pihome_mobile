@@ -51,8 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               );
           } else if (state.status.isSuccess) {
-            // context.go(AppRoutes.success);
-            context.go(AppRoutes.landing);
+            context.go(AppRoutes.loading);
           }
         },
         builder: (context, state) {

@@ -17,10 +17,10 @@ abstract class FamilyRemoteDataSource {
   Future<void> deleteFamilyInviteCode({
     required String token,
   });
-  Future<void> listUserInCurrentFamily({
+  Future<List<UserModel>> listUserInCurrentFamily({
     required String token,
   });
-  Future<FamilyModel> getCurrentUserFamily({
+  Future<FamilyModel?> getCurrentUserFamily({
     required String token,
   });
   Future<FamilyModel> updateCurrentUserFamily({
@@ -29,6 +29,9 @@ abstract class FamilyRemoteDataSource {
   Future<FamilyModel> joinFamily({
     required String token,
     required String inviteCode,
+  });
+  Future<FamilyModel?> getFamilyDetail({
+    required String token,
   });
 }
 
@@ -71,6 +74,7 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
 
   @override
   Future<String> createFamilyInviteCode({required String token}) async {
+    log('[createFamilyInviteCode] token: $token');
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         familyInviteCodeUrl,
@@ -81,8 +85,9 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
           },
         ),
       );
-      if (response.statusCode == 200) {
-        return response.data!['inviteCode'] as String;
+      log('[createFamilyInviteCode] response: ${response.statusCode}');
+      if (response.statusCode == 201) {
+        return response.data!['code'] as String;
       } else {
         throw ServerException();
       }
@@ -98,6 +103,7 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
 
   @override
   Future<void> deleteFamilyInviteCode({required String token}) async {
+    log('[deleteFamilyInviteCode] token: $token');
     try {
       final response = await _dio.delete(
         familyInviteCodeUrl,
@@ -108,7 +114,8 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
           },
         ),
       );
-      if (response.statusCode == 200) {
+      log('[deleteFamilyInviteCode] response: ${response.data}');
+      if (response.statusCode == 204) {
         return;
       } else {
         throw ServerException();
@@ -124,7 +131,7 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
   }
 
   @override
-  Future<FamilyModel> getCurrentUserFamily({required String token}) async {
+  Future<FamilyModel?> getCurrentUserFamily({required String token}) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         currentUserFamilyUrl,
@@ -137,6 +144,8 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
       );
       if (response.statusCode == 200) {
         return FamilyModel.fromJson(response.data!);
+      } else if (response.statusCode == 404) {
+        return null;
       } else {
         throw ServerException();
       }
@@ -164,9 +173,12 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
         ),
       );
       if (response.statusCode == 200) {
-        final usersJson = response.data!['users'] as List<dynamic>;
-        final users =
-            usersJson.map((user) => UserModel.fromJson(user)).toList();
+        final List<dynamic> usersJson = response.data!['users'];
+        final List<UserModel> users = [];
+        for (var user in usersJson) {
+          users.add(UserModel.fromJson(user));
+        }
+        log('users: $users');
         return users;
       } else {
         throw ServerException();
@@ -192,16 +204,16 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
     required String token,
     required String inviteCode,
   }) async {
+    log('[joinFamily] token: $token, inviteCode: $inviteCode');
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         joinFamilyUrl,
         data: {
-          'inviteCode': inviteCode,
+          'code': inviteCode,
         },
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
           },
         ),
       );
@@ -212,6 +224,36 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
       }
     } on DioException catch (e) {
       log('[joinFamily] e: $e');
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw ConnectionTimeoutException();
+      } else {
+        throw ServerException();
+      }
+    }
+  }
+
+  @override
+  Future<FamilyModel?> getFamilyDetail({required String token}) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        currentUserFamilyUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        return FamilyModel.fromJson(response.data!);
+      } else if (response.statusCode == 404) {
+        log('response 404: ${response.data}');
+        return null;
+      } else {
+        throw ServerException();
+      }
+    } on DioException catch (e) {
+      log('[getFamilyDetail] e: $e');
       if (e.type == DioExceptionType.connectionTimeout) {
         throw ConnectionTimeoutException();
       } else {
