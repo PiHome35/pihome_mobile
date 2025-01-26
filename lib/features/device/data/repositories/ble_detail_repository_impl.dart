@@ -15,7 +15,8 @@ class BleDetailRepositoryImpl implements BleDetailRepository {
     try {
       _device = await FlutterBluePlus.scanResults
           .expand((results) => results)
-          .firstWhere((result) => result.device.remoteId.toString() == device.id)
+          .firstWhere(
+              (result) => result.device.remoteId.toString() == device.id)
           .then((result) => result.device);
 
       await _device?.connect();
