@@ -122,7 +122,7 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
             variables: {
               'chatId': chatId,
               if (limit != null && offset != null)
-                'pagination': {'limit': limit, 'offset': offset},
+                'pagination': {'limit': limit, 'skip': offset},
             },
           ),
         );

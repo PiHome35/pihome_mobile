@@ -15,8 +15,6 @@ class DeviceEntity extends Equatable {
   final String createdAt;
   final String updatedAt;
   final bool isOn;
-  // final String type;
-  // final StatusDevice status;
 
   const DeviceEntity({
     required this.id,
@@ -26,8 +24,6 @@ class DeviceEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     required this.isOn,
-    // required this.type,
-    // required this.status,
   });
 
   @override

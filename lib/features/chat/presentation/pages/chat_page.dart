@@ -41,7 +41,7 @@ class _ChatPageState extends State<ChatPage> {
             if (familyId != null) {
               context.read<ChatBloc>().add(GetAllChats(
                     familyId: familyId,
-                    limit: 25,
+                    limit: 20,
                   ));
             }
           }
@@ -63,7 +63,7 @@ class _ChatPageState extends State<ChatPage> {
                   if (userState is UserLocalLoaded) {
                     context.read<ChatBloc>().add(GetAllChats(
                           familyId: userState.user.familyId!,
-                          limit: 25,
+                          limit: 20,
                         ));
                   }
                 }
@@ -78,7 +78,7 @@ class _ChatPageState extends State<ChatPage> {
                   if (familyId != null) {
                     context.read<ChatBloc>().add(GetAllChats(
                           familyId: familyId,
-                          limit: 25,
+                          limit: 20,
                         ));
                   } else {
                     log('No family id');
@@ -103,7 +103,7 @@ class _ChatPageState extends State<ChatPage> {
                             if (familyId != null) {
                               context.read<ChatBloc>().add(GetAllChats(
                                     familyId: familyId,
-                                    limit: 25,
+                                    limit: 20,
                                   ));
                             }
                           }

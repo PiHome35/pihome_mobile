@@ -43,14 +43,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<NewMessageReceived>(_onNewMessageReceived);
     on<CreateNewChat>(_onCreateNewChat);
     on<CreatedNewChat>(_onCreatedNewChat);
+    on<LoadMoreMessages>(_onLoadMoreMessages);
   }
 
   Future<void> _onGetAllChats(
       GetAllChats event, Emitter<ChatState> emit) async {
-    emit(const ChatLoading());
+    emit(ChatLoading());
     final token = await _getStorageTokenUseCase.execute();
     if (token.isEmpty) {
-      emit(const ChatError('No token found'));
+      emit(const ChatError(message: 'No token found'));
       return;
     }
     final result = await _getAllChatsUseCase.execute(
@@ -64,16 +65,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (result.data != null) {
       emit(ChatsLoaded(result.data!));
     } else {
-      emit(ChatError(result.error.toString()));
+      emit(ChatError(message: result.error.toString()));
     }
   }
 
   Future<void> _onGetChatMessages(
       GetChatMessages event, Emitter<ChatState> emit) async {
-    emit(const ChatLoading());
+    emit(ChatLoading());
     final token = await _getStorageTokenUseCase.execute();
     if (token.isEmpty) {
-      emit(const ChatError('No token found'));
+      emit(const ChatError(message: 'No token found'));
       return;
     }
     final result = await _getChatMessagesUseCase.execute(
@@ -85,9 +86,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ),
     );
     if (result.data != null) {
-      emit(MessagesLoaded(result.data!));
+      emit(MessagesLoaded(messages: result.data!));
     } else {
-      emit(ChatError(result.error.toString()));
+      emit(ChatError(message: result.error.toString()));
     }
   }
 
@@ -95,13 +96,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       SendMessage event, Emitter<ChatState> emit) async {
     final token = await _getStorageTokenUseCase.execute();
     if (token.isEmpty) {
-      emit(const ChatError('No token found'));
+      emit(const ChatError(message: 'No token found'));
       return;
     }
 
     final currentState = state;
     if (currentState is MessagesLoaded) {
       final currentMessages = List<MessageEntity>.from(currentState.messages);
+      log('currentMessages: ${currentMessages.length}');
+      log('currentMessages: ${currentMessages.last.content}');
 
       final result = await _addMessageUseCase.execute(
         AddMessageParams(
@@ -115,9 +118,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       if (result.data != null) {
         currentMessages.add(result.data!);
-        emit(MessagesLoaded(currentMessages));
+        emit(MessagesLoaded(messages: currentMessages));
       } else {
-        emit(ChatError(result.error.toString()));
+        emit(ChatError(message: result.error.toString()));
       }
     }
   }
@@ -128,7 +131,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     final token = await _getStorageTokenUseCase.execute();
     if (token.isEmpty) {
-      if (!emit.isDone) emit(const ChatError('No token found'));
+      if (!emit.isDone) emit(const ChatError(message: 'No token found'));
       return;
     }
 
@@ -137,14 +140,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         GetChatMessagesParams(
           chatId: event.chatId,
           token: token,
+          limit: 20,
+          offset: 0,
         ),
       );
 
       List<MessageEntity> messages = [];
       if (initialMessages.data != null) {
         messages = List.from(initialMessages.data!);
-        messages = messages.reversed.toList();
-        emit(MessagesLoaded(messages));
+        emit(MessagesLoaded(
+          messages: messages,
+          currentOffset: 20,
+          hasMoreMessages: initialMessages.data!.length >= 20,
+        ));
       }
 
       _messageSubscription = _subscribeToMessagesUseCase
@@ -159,17 +167,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           log('Subscription result: ${result.data}');
           if (result.data != null) {
             log('new message received: ${result.data}');
-            add(NewMessageReceived(result.data!));
+            add(NewMessageReceived(message: result.data!));
           }
         },
         onError: (error) {
-          emit(ChatError(error.toString()));
+          emit(ChatError(message: error.toString()));
         },
       );
     } catch (e) {
       log('Subscription setup error: $e');
       if (!emit.isDone) {
-        emit(ChatError(e.toString()));
+        emit(ChatError(message: e.toString()));
       }
     }
   }
@@ -180,7 +188,57 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentState is MessagesLoaded) {
       final updatedMessages = List<MessageEntity>.from(currentState.messages);
       updatedMessages.add(event.message);
-      emit(MessagesLoaded(updatedMessages));
+      emit(MessagesLoaded(messages: updatedMessages));
+    }
+  }
+
+  Future<void> _onLoadMoreMessages(
+      LoadMoreMessages event, Emitter<ChatState> emit) async {
+    final currentState = state;
+    if (currentState is MessagesLoaded) {
+      if (currentState.isLoadingMore || !currentState.hasMoreMessages) return;
+
+      emit(currentState.copyWith(isLoadingMore: true));
+
+      final token = await _getStorageTokenUseCase.execute();
+      if (token.isEmpty) {
+        emit(const ChatError(message: 'No token found'));
+        return;
+      }
+
+      try {
+        final nextOffset = currentState.currentOffset + event.pageSize;
+        final result = await _getChatMessagesUseCase.execute(
+          GetChatMessagesParams(
+            chatId: event.chatId,
+            token: token,
+            limit: event.pageSize,
+            offset: nextOffset,
+          ),
+        );
+
+        if (result.data != null) {
+          final oldMessages = List<MessageEntity>.from(currentState.messages);
+          oldMessages.insertAll(0, result.data!);
+
+          emit(MessagesLoaded(
+            messages: oldMessages,
+            hasMoreMessages: result.data!.length >= event.pageSize,
+            isLoadingMore: false,
+            currentOffset: nextOffset,
+          ));
+        } else {
+          emit(LoadMoreError(
+            message: result.error.toString(),
+            currentMessages: currentState.messages,
+          ));
+        }
+      } catch (e) {
+        emit(LoadMoreError(
+          message: e.toString(),
+          currentMessages: currentState.messages,
+        ));
+      }
     }
   }
 
@@ -188,7 +246,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       CreateNewChat event, Emitter<ChatState> emit) async {
     final token = await _getStorageTokenUseCase.execute();
     if (token.isEmpty) {
-      emit(const ChatError('No token found'));
+      emit(const ChatError(message: 'No token found'));
       return;
     }
     final result = await _createNewChatUseCase.execute(
@@ -201,11 +259,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (result.data != null) {
       emit(ChatCreated(result.data!));
     } else {
-      emit(ChatError(result.error.toString()));
+      emit(ChatError(message: result.error.toString()));
     }
   }
 
-  Future<void> _onCreatedNewChat(CreatedNewChat event, Emitter<ChatState> emit) async {
+  Future<void> _onCreatedNewChat(
+      CreatedNewChat event, Emitter<ChatState> emit) async {
     final currentState = state;
     log('after created new chat currentState: $currentState');
     if (currentState is ChatCreated) {
@@ -221,6 +280,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Future<void> _onStopMessageSubscription(
       StopMessageSubscription event, Emitter<ChatState> emit) async {
     await _messageSubscription?.cancel();
+    log('message subscription cancelled');
     _messageSubscription = null;
   }
 

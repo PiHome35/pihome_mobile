@@ -1,8 +1,8 @@
-// const hostUrl = "http://192.168.32.36:3000";
-// const hostUrl = "http://192.168.1.127:3000";
-const hostUrl = "http://192.168.1.147:3000";
-// const hostUrl = "http://10.31.112.18:3000";
-const String wsHostUrl = "ws://$hostUrl/graphql";
+// const ipHost = "192.168.32.36";
+const ipHost = "192.168.1.154";
+const port = "3000";
+const hostUrl = "http://$ipHost:$port";
+const wsHostUrl = "ws://$ipHost:$port/graphql";
 const baseUrl = "$hostUrl/api/v1";
 
 const getAccessTokenUrl = "$baseUrl/auth/login/user";

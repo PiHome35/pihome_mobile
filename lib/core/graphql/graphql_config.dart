@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mobile_pihome/config/config_path.dart';
 
@@ -13,18 +15,18 @@ class GraphQLConfig {
   static final GraphQLCache _cache = GraphQLCache();
   static const String _websocketEndpoint = wsHostUrl;
 
-  
-
   static Link _splitLink(String? token) {
-    // Update WebSocketLink with the token when needed
+    log('wsLink: $_websocketEndpoint');
     final wsLink = WebSocketLink(
       _websocketEndpoint,
       config: SocketClientConfig(
         initialPayload: () => {
           'Authorization': token != null ? 'Bearer $token' : '',
+          'protocol': 'graphql-ws',
         },
         autoReconnect: true,
-        inactivityTimeout: const Duration(seconds: 30),
+        inactivityTimeout: const Duration(minutes: 30),
+        delayBetweenReconnectionAttempts: const Duration(seconds: 1),
       ),
     );
 
@@ -33,7 +35,10 @@ class GraphQLConfig {
     );
 
     return Link.split(
-      (request) => request.isSubscription,
+      (request) {
+        log('request: $request');
+        return request.isSubscription;
+      },
       token != null ? authLink.concat(wsLink) : wsLink,
       token != null ? authLink.concat(_httpLink) : _httpLink,
     );

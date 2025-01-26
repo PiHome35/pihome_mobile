@@ -9,12 +9,14 @@ class GetChatMessagesParams {
   final String token;
   final int? limit;
   final int? offset;
+  final String? lastMessageId;
 
-  GetChatMessagesParams({
+  const GetChatMessagesParams({
     required this.chatId,
     required this.token,
     this.limit,
     this.offset,
+    this.lastMessageId,
   });
 }
 
@@ -23,7 +25,6 @@ class GetChatMessagesUseCase
     implements
         UseCase<GraphqlDataState<List<MessageEntity>>, GetChatMessagesParams> {
   final IChatRepository _repository;
-
   GetChatMessagesUseCase(this._repository);
 
   @override

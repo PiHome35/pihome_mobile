@@ -1,5 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/core/error/exception.dart';
 import 'package:mobile_pihome/core/utils/cache/hive_manager.dart';
 import 'package:mobile_pihome/features/device/data/models/device_model.dart';

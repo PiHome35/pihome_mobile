@@ -41,14 +41,13 @@ class DeviceView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.folder_outlined),
             onPressed: () {
-              // TODO: Navigate to device groups
               context.push('/device-groups');
             },
           ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              // TODO: Implement add device
+              context.push('/bluetooth-check');
             },
           ),
         ],

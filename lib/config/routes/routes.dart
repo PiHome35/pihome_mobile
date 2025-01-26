@@ -6,6 +6,9 @@ import 'package:mobile_pihome/features/authentication/presentation/pages/splash_
 import 'package:mobile_pihome/features/chat/domain/entities/message.dart';
 import 'package:mobile_pihome/features/chat/presentation/pages/chat_room_page.dart';
 import 'package:mobile_pihome/features/chat/presentation/pages/create_chat_room_page.dart';
+import 'package:mobile_pihome/features/device/domain/entities/ble_device_entity.dart';
+import 'package:mobile_pihome/features/device/presentation/pages/bluetooth_check_page.dart';
+import 'package:mobile_pihome/features/device/presentation/pages/device_detail_page.dart';
 import 'package:mobile_pihome/features/device/presentation/pages/device_group_page.dart';
 import 'package:mobile_pihome/features/family/presentation/pages/create_family_page.dart';
 import 'package:mobile_pihome/features/family/presentation/pages/family_settings_page.dart';
@@ -14,6 +17,7 @@ import 'package:mobile_pihome/features/loading/presentation/pages/loading_page.d
 import 'package:mobile_pihome/features/chat/presentation/pages/chat_page.dart';
 import 'package:mobile_pihome/features/family/presentation/pages/join_family_page.dart';
 import 'dart:async';
+import 'package:mobile_pihome/features/device/presentation/pages/device_scan_page.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -32,6 +36,10 @@ class AppRoutes {
   static const chatRoom = '/chat/:chatId';
   static const joinFamily = '/join-family';
   static const familySettings = '/family-settings';
+  static const bluetoothCheck = '/bluetooth-check';
+  static const scanDevice = '/scan-device';
+  static const deviceDetail = '/device/detail';
+
   static final router = GoRouter(
     initialLocation: splash,
     routes: <RouteBase>[
@@ -85,6 +93,20 @@ class AppRoutes {
       GoRoute(
         path: familySettings,
         builder: (context, state) => const FamilySettingsPage(),
+      ),
+      GoRoute(
+        path: bluetoothCheck,
+        builder: (context, state) => const BluetoothCheckPage(),
+      ),
+      GoRoute(
+        path: scanDevice,
+        builder: (context, state) => const DeviceScanPage(),
+      ),
+      GoRoute(
+        path: deviceDetail,
+        builder: (context, state) => DeviceDetailPage(
+          device: state.extra as BleDeviceEntity,
+        ),
       ),
     ],
   );

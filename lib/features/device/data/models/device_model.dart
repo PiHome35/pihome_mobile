@@ -6,31 +6,24 @@ part 'device_model.g.dart';
 class DeviceModel {
   
   @HiveField(0)
-  // @override
   final String id;
 
   @HiveField(1)
-  // @override
   final String name;
 
   @HiveField(2)
-  // @override
   final String familyId;
 
   @HiveField(3)
-  // @override
   final String createdAt;
 
   @HiveField(4)
-  // @override
   final String updatedAt;
 
   @HiveField(5)
-  // @override
   final String? groupId;
 
   @HiveField(6)
-  // @override
   final bool isOn;
 
   const DeviceModel({
@@ -41,8 +34,6 @@ class DeviceModel {
     required this.updatedAt,
     required this.groupId,
     required this.isOn,
-    // required super.type,
-    // required super.status,
   });
 
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
