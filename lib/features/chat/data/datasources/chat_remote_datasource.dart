@@ -19,6 +19,7 @@ abstract class IChatRemoteDataSource {
   });
   Future<ChatModel> createNewChat({
     required String familyId,
+    required String name,
     required String token,
   });
   Future<MessageModel> addMessage({
@@ -27,8 +28,12 @@ abstract class IChatRemoteDataSource {
     required String chatId,
     required String token,
   });
-  
-  
+
+  Future<String> deleteChat({
+    required String chatId,
+    required String token,
+  });
+
   Stream<MessageModel?> onMessageAdded({
     required String chatId,
     required String token,
@@ -76,6 +81,7 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
               }
               createdAt
               updatedAt
+              deviceId
             }
           }
         '''),
@@ -139,6 +145,7 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
   @override
   Future<ChatModel> createNewChat({
     required String familyId,
+    required String name,
     required String token,
   }) async {
     final result = await _graphQLConfig.clientWithToken(token).mutate(
@@ -146,8 +153,8 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
             cacheRereadPolicy: CacheRereadPolicy.ignoreAll,
             fetchPolicy: FetchPolicy.networkOnly,
             document: gql('''
-          mutation CreateNewChat(\$familyId: String!) {
-            createNewChat(familyId: \$familyId) {
+          mutation CreateNewChat(\$familyId: String!, \$name: String!) {
+            createNewChat(familyId: \$familyId, name: \$name) {
               id
               familyId
               name
@@ -163,7 +170,10 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
             }
           }
         '''),
-            variables: {'familyId': familyId},
+            variables: {
+              'familyId': familyId,
+              'name': name,
+            },
           ),
         );
 
@@ -291,20 +301,19 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
     });
   }
 
-  
   @override
   Stream<int> onCountdown({required int seconds}) {
     final operation = _graphQLConfig.client.subscribe(
-          SubscriptionOptions(
-            document: gql('''
+      SubscriptionOptions(
+        document: gql('''
           subscription OnCountdown {
             countdown
           }
         '''),
-            variables: {'seconds': seconds},
-            fetchPolicy: FetchPolicy.networkOnly,
-          ),
-        );
+        variables: {'seconds': seconds},
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
+    );
 
     return operation.map((result) {
       if (result.hasException) {
@@ -313,21 +322,21 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
       return result.data!['countdown'];
     });
   }
-  
+
   @override
   Future<bool> countdown({required int seconds}) async {
     final result = await _graphQLConfig.client.mutate(
-          MutationOptions(
-            document: gql('''
+      MutationOptions(
+        document: gql('''
           mutation Countdown(\$seconds: Float!) {
             startCountdown(seconds: \$seconds)
           }
         '''),
-            variables: {'seconds': seconds},
-            fetchPolicy: FetchPolicy.networkOnly,
-            cacheRereadPolicy: CacheRereadPolicy.ignoreAll,
-          ),
-        );
+        variables: {'seconds': seconds},
+        fetchPolicy: FetchPolicy.networkOnly,
+        cacheRereadPolicy: CacheRereadPolicy.ignoreAll,
+      ),
+    );
 
     if (result.hasException) {
       log('error in countdown: ${result.exception}');
@@ -335,5 +344,32 @@ class ChatRemoteDataSource implements IChatRemoteDataSource {
     }
     return result.data!['countdown'];
   }
-}
 
+  @override
+  Future<String> deleteChat(
+      {required String chatId, required String token}) async {
+    const String mutation = r'''
+        mutation DeleteChat($chatId: String!) {
+          deleteChat(chatId: $chatId) {
+            chatId
+          }
+        }
+      ''';
+
+    final QueryResult result =
+        await _graphQLConfig.clientWithToken(token).mutate(
+              MutationOptions(
+                document: gql(mutation),
+                variables: {
+                  'chatId': chatId,
+                },
+                fetchPolicy: FetchPolicy.noCache,
+              ),
+            );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+    return result.data!['deleteChat']['chatId'] as String;
+  }
+}

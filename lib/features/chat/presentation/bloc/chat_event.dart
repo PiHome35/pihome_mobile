@@ -40,8 +40,12 @@ class GetChatMessages extends ChatEvent {
 
 class CreateNewChat extends ChatEvent {
   final String familyId;
+  final String name;
 
-  const CreateNewChat({required this.familyId});
+  const CreateNewChat({
+    required this.familyId,
+    required this.name,
+  });
 
   @override
   List<Object?> get props => [familyId];
@@ -108,8 +112,6 @@ final class NewMessageReceived extends ChatEvent {
   List<Object?> get props => [message];
 }
 
-
-
 final class LoadMoreMessages extends ChatEvent {
   final String chatId;
   final String lastMessageId;
@@ -123,4 +125,13 @@ final class LoadMoreMessages extends ChatEvent {
 
   @override
   List<Object?> get props => [chatId, lastMessageId, pageSize];
+}
+
+class DeleteChat extends ChatEvent {
+  final String chatId;
+
+  const DeleteChat({required this.chatId});
+
+  @override
+  List<Object?> get props => [chatId];
 }

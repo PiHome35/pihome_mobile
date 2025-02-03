@@ -99,6 +99,7 @@ class _CreateChatRoomPageState extends State<CreateChatRoomPage> {
                               context.read<ChatBloc>().add(
                                     CreateNewChat(
                                       familyId: userState.user.familyId!,
+                                      name: _chatNameController.text,
                                     ),
                                   );
                             }

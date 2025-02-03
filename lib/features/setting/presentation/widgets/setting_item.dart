@@ -31,9 +31,7 @@ class SettingItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontFamily: 'RobotoMono',
-                    ),
+                    style: AppTextStyles.bodyMedium,
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),

@@ -3,6 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/core/resources/data_state.dart';
 import 'package:mobile_pihome/core/services/spotify_auth_service.dart';
+import 'package:mobile_pihome/features/family/data/datasources/chat_ai_model_remote_datasource.dart';
+import 'package:mobile_pihome/features/family/data/models/chat_ai_model.dart';
+import 'package:mobile_pihome/features/family/domain/entities/chat_ai_entity.dart';
 import 'package:mobile_pihome/features/setting/data/datasources/setting_local_datasource.dart';
 import 'package:mobile_pihome/features/setting/data/datasources/setting_remote_datasource.dart';
 import 'package:mobile_pihome/features/setting/data/models/setting_model.dart';
@@ -16,11 +19,13 @@ class SettingRepositoryImpl implements SettingRepository {
   final SpotifyAuthService _spotifyAuthService;
   final SettingRemoteDataSource _settingRemoteDataSource;
   final SettingLocalDataSource _settingLocalDataSource;
+  final ChatAiModelRemoteDataSource _chatAiModelRemoteDataSource;
 
   SettingRepositoryImpl(
     this._spotifyAuthService,
     this._settingRemoteDataSource,
     this._settingLocalDataSource,
+    this._chatAiModelRemoteDataSource,
   );
 
   @override
@@ -109,6 +114,27 @@ class SettingRepositoryImpl implements SettingRepository {
 
   @override
   Future<SettingEntity> updateCachedSetting(SettingEntity setting) async {
+    final SettingModel settingModel = setting.toModel();
+    await _settingLocalDataSource.cachedSetting(settingModel);
+    return setting;
+  }
+
+  @override
+  Future<List<ChatAiModelEntity>> getChatAiModels({required String token}) async {
+    try {
+      final result = await _chatAiModelRemoteDataSource.getChatAiModels(token: token);
+      final List<ChatAiModelEntity> chatAiModels = [];
+      for (ChatAiModel item in result) {
+        chatAiModels.add(item.toEntity());
+      }
+      return chatAiModels;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+  
+  @override
+  Future<SettingEntity> updateSetting(SettingEntity setting) async {
     final SettingModel settingModel = setting.toModel();
     await _settingLocalDataSource.cachedSetting(settingModel);
     return setting;

@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/features/authentication/data/data_sources/token_local_datasource.dart';
 // import 'package:mobile_pihome/features/authentication/data/models/auth_user_model.dart';
 import 'package:mobile_pihome/features/authentication/domain/entities/auth_user.dart';
+import 'package:mobile_pihome/features/authentication/domain/entities/register_device_response_entity.dart';
 import 'package:mobile_pihome/features/authentication/domain/entities/token.dart';
 import 'package:mobile_pihome/core/resources/data_state.dart';
 import 'package:mobile_pihome/features/authentication/domain/repositories/auth_repositories.dart';
@@ -74,7 +75,6 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       log('response: ${response.accessToken}');
 
-
       return DataSuccess(response.toEntity());
     } catch (e) {
       return DataFailed(
@@ -105,5 +105,36 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<String> getStorageToken() async {
     final token = await _tokenLocalDataSource.getToken();
     return token;
+  }
+
+  @override
+  Future<DataState<RegisterDeviceResponseEntity>> registerDevice({
+    required String accessToken,
+    required String clientId,
+    required String macAddress,
+    required String name,
+  }) async {
+    try {
+      final response = await _remoteDataSource.registerDevice(
+        accessToken: accessToken,
+        clientId: clientId,
+        macAddress: macAddress,
+        name: name,
+      );
+      final deviceModel = response.device;
+      final clientSecret = response.clientSecret;
+      return DataSuccess(RegisterDeviceResponseEntity(
+        device: deviceModel.toEntity(),
+        clientSecret: clientSecret,
+      ));
+    } catch (e) {
+      log('error on register device: $e');
+      return DataFailed(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          error: e.toString(),
+        ),
+      );
+    }
   }
 }

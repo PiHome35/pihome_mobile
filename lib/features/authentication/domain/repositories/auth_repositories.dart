@@ -1,6 +1,7 @@
 import 'package:mobile_pihome/core/resources/data_state.dart';
 // import 'package:mobile_pihome/features/authentication/data/models/auth_user_model.dart';
 import 'package:mobile_pihome/features/authentication/domain/entities/auth_user.dart';
+import 'package:mobile_pihome/features/authentication/domain/entities/register_device_response_entity.dart';
 import 'package:mobile_pihome/features/authentication/domain/entities/token.dart';
 
 abstract class AuthRepository {
@@ -17,5 +18,11 @@ abstract class AuthRepository {
 
   Future<DataState<AuthUserEntity>> getMe({
     required String accessToken,
+  });
+  Future<DataState<RegisterDeviceResponseEntity>> registerDevice({
+    required String accessToken,
+    required String clientId,
+    required String macAddress,
+    required String name,
   });
 }

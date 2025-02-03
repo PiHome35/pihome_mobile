@@ -10,13 +10,11 @@ class BleLocalDataSourceImpl implements BleLocalDataSource {
   @override
   Stream<List<BluetoothDevice>> scanDevices() async* {
     try {
-      // Start scanning
       await FlutterBluePlus.startScan(
-        timeout: const Duration(seconds: 10),
+        timeout: const Duration(seconds: 20),
         androidUsesFineLocation: false,
       );
 
-      // Listen to scan results
       await for (final results in FlutterBluePlus.scanResults) {
         log('Scan results: ${results.length} devices');
         final filteredDevices = results

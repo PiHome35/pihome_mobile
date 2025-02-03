@@ -14,6 +14,7 @@ import 'package:mobile_pihome/features/chat/presentation/bloc/chat_state.dart';
 import 'package:mobile_pihome/features/chat/presentation/widgets/chat_list_item.dart';
 import 'package:mobile_pihome/core/presentation/widgets/error_state.dart';
 import 'package:mobile_pihome/core/graphql/graph_exception.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -141,12 +142,28 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       itemCount: chats.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      separatorBuilder: (context, index) => SizedBox(height: 8.h),
       itemBuilder: (context, index) {
         final chat = chats[index];
-        return ChatListItem(chat: chat);
+        return ChatListItem(
+          chat: chat,
+          chatBloc: context.read<ChatBloc>(),
+          onChatDeleted: () {
+            // Refresh the chat list after deletion
+            final userState = context.read<UserLocalBloc>().state;
+            if (userState is UserLocalLoaded) {
+              final familyId = userState.user.familyId;
+              if (familyId != null) {
+                context.read<ChatBloc>().add(GetAllChats(
+                      familyId: familyId,
+                      limit: 20,
+                    ));
+              }
+            }
+          },
+        );
       },
     );
   }

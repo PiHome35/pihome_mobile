@@ -9,6 +9,7 @@ class ChatModel extends ChatEntity {
     super.latestMessage,
     required super.createdAt,
     required super.updatedAt,
+    super.deviceId,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,7 @@ class ChatModel extends ChatEntity {
       latestMessage: latestMessage?.toEntity(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      deviceId: json['deviceId'] as String?,
     );
   }
 
@@ -35,6 +37,7 @@ class ChatModel extends ChatEntity {
           : null,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'deviceId': deviceId,
     };
   }
 

@@ -20,89 +20,155 @@ class DeviceGroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.folder_outlined,
-                    color: theme.colorScheme.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      group.name,
-                      style: AppTextStyles.labelLarge,
-                    ),
-                  ),
-                  if (onEdit != null || onDelete != null) ...[
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      itemBuilder: (context) => [
-                        if (onEdit != null)
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                Icon(Icons.edit_outlined, size: 20),
-                                SizedBox(width: 8),
-                                Text('Edit'),
-                              ],
+                      child: Stack(
+                        children: [
+                          Transform.translate(
+                            offset: const Offset(-3, -3),
+                            child: Icon(
+                              Icons.devices_other_rounded,
+                              color: theme.colorScheme.primary
+                                  .withValues(alpha: 0.1),
+                              size: 20,
                             ),
                           ),
-                        if (onDelete != null)
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete_outline, size: 20),
-                                SizedBox(width: 8),
-                                Text('Delete'),
-                              ],
+                          Transform.translate(
+                            offset: const Offset(3, 3),
+                            child: Icon(
+                              Icons.devices_sharp,
+                              color: theme.colorScheme.primary,
+                              size: 20,
                             ),
                           ),
-                      ],
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'edit':
-                            onEdit?.call();
-                          case 'delete':
-                            onDelete?.call();
-                        }
-                      },
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            group.name,
+                            style: AppTextStyles.labelLarge.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (group.devices.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${group.devices.length} ${group.devices.length == 1 ? 'device' : 'devices'}',
+                              style: AppTextStyles.deviceType.copyWith(
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (onEdit != null || onDelete != null) ...[
+                      PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert_rounded,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        position: PopupMenuPosition.under,
+                        itemBuilder: (context) => [
+                          if (onEdit != null)
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.edit_rounded,
+                                    size: 20,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Edit',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (onDelete != null)
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete_rounded,
+                                    size: 20,
+                                    color: theme.colorScheme.error,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Delete',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'edit':
+                              onEdit?.call();
+                            case 'delete':
+                              onDelete?.call();
+                          }
+                        },
+                      ),
+                    ],
                   ],
-                ],
-              ),
-              if (group.deviceIds.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '${group.deviceIds.length} devices',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ),

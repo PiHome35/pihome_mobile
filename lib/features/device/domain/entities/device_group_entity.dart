@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:mobile_pihome/features/device/domain/entities/device_entity.dart';
 
 class DeviceGroupEntity extends Equatable {
   final String id;
@@ -6,8 +7,7 @@ class DeviceGroupEntity extends Equatable {
   final String familyId;
   final String createdAt;
   final String updatedAt;
-  final String? icon;
-  final List<String> deviceIds;
+  final List<DeviceEntity> devices;
 
   const DeviceGroupEntity({
     required this.id,
@@ -15,8 +15,7 @@ class DeviceGroupEntity extends Equatable {
     required this.familyId,
     required this.createdAt,
     required this.updatedAt,
-    this.icon,
-    required this.deviceIds,
+    this.devices = const [],
   });
 
   @override
@@ -26,7 +25,6 @@ class DeviceGroupEntity extends Equatable {
         familyId,
         createdAt,
         updatedAt,
-        icon,
-        deviceIds,
+        devices,
       ];
 }

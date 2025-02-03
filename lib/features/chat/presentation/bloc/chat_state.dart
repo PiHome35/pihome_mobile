@@ -34,29 +34,38 @@ final class MessagesLoaded extends ChatState {
   final bool hasMoreMessages;
   final bool isLoadingMore;
   final int currentOffset;
+  final bool isAiTyping;
 
   const MessagesLoaded({
     required this.messages,
     this.hasMoreMessages = true,
     this.isLoadingMore = false,
     this.currentOffset = 0,
+    this.isAiTyping = false,
   });
 
   @override
-  List<Object?> get props =>
-      [messages, hasMoreMessages, isLoadingMore, currentOffset];
+  List<Object?> get props => [
+        messages,
+        hasMoreMessages,
+        isLoadingMore,
+        currentOffset,
+        isAiTyping,
+      ];
 
   MessagesLoaded copyWith({
     List<MessageEntity>? messages,
     bool? hasMoreMessages,
     bool? isLoadingMore,
     int? currentOffset,
+    bool? isAiTyping,
   }) {
     return MessagesLoaded(
       messages: messages ?? this.messages,
       hasMoreMessages: hasMoreMessages ?? this.hasMoreMessages,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       currentOffset: currentOffset ?? this.currentOffset,
+      isAiTyping: isAiTyping ?? this.isAiTyping,
     );
   }
 }
@@ -100,4 +109,12 @@ final class LoadMoreError extends ChatState {
 
   @override
   List<Object?> get props => [message, currentMessages];
+}
+
+class ChatDeleted extends ChatState {
+  final String chatId;
+  const ChatDeleted(this.chatId);
+
+  @override
+  List<Object?> get props => [chatId];
 }

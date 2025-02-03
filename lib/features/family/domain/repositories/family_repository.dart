@@ -28,4 +28,9 @@ abstract class FamilyRepository {
   Future<DataState<FamilyEntity?>> getFamilyDetail({
     required String token,
   });
+
+  Future<DataState<FamilyEntity>> updateCurrentUserFamily({
+    required String token,
+    required String chatModelKey,
+  });
 }

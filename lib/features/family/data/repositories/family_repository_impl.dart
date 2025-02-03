@@ -118,4 +118,21 @@ class FamilyRepositoryImpl implements FamilyRepository {
           requestOptions: RequestOptions(path: ''), error: e.toString()));
     }
   }
+
+  @override
+  Future<DataState<FamilyEntity>> updateCurrentUserFamily({
+    required String token,
+    required String chatModelKey,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateCurrentUserFamily(
+        token: token,
+        chatModelKey: chatModelKey,
+      );
+      return DataSuccess(result.toEntity());
+    } catch (e) {
+      return DataFailed(DioException(
+          requestOptions: RequestOptions(path: ''), error: e.toString()));
+    }
+  }
 }

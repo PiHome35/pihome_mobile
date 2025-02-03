@@ -43,14 +43,12 @@ class LoadingRemoteBloc extends Bloc<LoadingRemoteEvent, LoadingRemoteState> {
     Emitter<LoadingRemoteState> emit,
   ) async {
     try {
-      // 1. Get token
       final token = await _getStorageTokenUseCase.execute();
       if (token.isEmpty) {
         emit(const LoadingRemoteError('Token is empty'));
         return;
       }
 
-      // final dataStateUser = await _getUserUseCase.execute(token);
       final dataStateUser = await _getUserUseCase.execute(token);
       log('dataStateUser: $dataStateUser');
       if (dataStateUser is DataFailed) {
@@ -59,7 +57,6 @@ class LoadingRemoteBloc extends Bloc<LoadingRemoteEvent, LoadingRemoteState> {
         return;
       }
 
-      // 2. Get Family Detail
       FamilyEntity? familyDetailData;
       SpotifyConnectionEntity? spotifyConnectionData;
       if (dataStateUser is DataSuccess && dataStateUser.data?.familyId != null) {
@@ -81,9 +78,6 @@ class LoadingRemoteBloc extends Bloc<LoadingRemoteEvent, LoadingRemoteState> {
         log('spotifyConnectionData: $spotifyConnectionData');
       }
 
-      // 3. Get Spotify Connection only if family detail is successful
-
-      // 4. Create Setting Entity with combined data
       final settingData = SettingEntity(
         userEmail: '',
         selectedLLMModel: familyDetailData?.chatModelId ?? '',
@@ -91,10 +85,7 @@ class LoadingRemoteBloc extends Bloc<LoadingRemoteEvent, LoadingRemoteState> {
         familyName: familyDetailData?.name ?? '',
       );
       log('settingData: $settingData');
-      // 5. Cache setting data
       await _cacheSettingUseCase.execute(settingData);
-
-      // 6. Emit success state with setting data
       emit(LoadingRemoteSettingSuccess(settingData));
     } catch (e) {
       log('Error in _onLoadSetting', error: e);
@@ -115,8 +106,6 @@ class LoadingRemoteBloc extends Bloc<LoadingRemoteEvent, LoadingRemoteState> {
         accessToken: token,
       ),
     );
-    log('[LoadingRemoteBloc] spotify dataState: ${dataState.toString()}');
-    log('[LoadingRemoteBloc] spotify dataState.data: ${dataState.data.toString()}');
     if (dataState is DataSuccess && dataState.data != null) {
       emit(LoadingRemoteSpotifySuccess(dataState.data!));
     } else if (dataState is DataFailed) {
@@ -143,13 +132,11 @@ class LoadingRemoteBloc extends Bloc<LoadingRemoteEvent, LoadingRemoteState> {
     LoadUserData event,
     Emitter<LoadingRemoteState> emit,
   ) async {
-    log('LoadingUserData');
     try {
       emit(const LoadingRemoteLoading());
       final token = await _getStorageTokenUseCase.execute();
 
       final dataState = await _getUserUseCase.execute(token);
-      log('[LoadingRemoteBloc] user dataState: ${dataState.toString()}');
       if (dataState is DataSuccess && dataState.data != null) {
         await _cacheUserUseCase.execute(dataState.data!);
         emit(LoadingRemoteUserSuccess(dataState.data!));

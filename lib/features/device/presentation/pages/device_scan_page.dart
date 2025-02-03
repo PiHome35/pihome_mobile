@@ -93,7 +93,9 @@ class _DeviceScanViewState extends State<DeviceScanView> {
         centerTitle: true,
         title: Text(
           'Scan Devices',
-          style: AppTextStyles.headingMedium,
+          style: AppTextStyles.headingMedium.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
         ),
       ),
       body: BlocConsumer<BleScanBloc, BleScanState>(
@@ -116,40 +118,101 @@ class _DeviceScanViewState extends State<DeviceScanView> {
   }
 
   Widget _buildInitialState() {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return Center(
+      child: CircularProgressIndicator(
+        color: Theme.of(context).colorScheme.primary,
+      ),
     );
   }
 
   Widget _buildScanningState(BuildContext context, BleScanInProgress state) {
-    return Column(
-      children: [
-        const SizedBox(height: 16),
-        const LinearProgressIndicator(),
-        const SizedBox(height: 16),
-        Expanded(
-          child: _buildDeviceList(context, state.devices),
-        ),
-      ],
-    );
-  }
+    final theme = Theme.of(context);
 
-  Widget _buildCompleteState(BuildContext context, BleScanComplete state) {
     return Column(
       children: [
-        const SizedBox(height: 16),
-        Expanded(
-          child: _buildDeviceList(context, state.devices),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: .1),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Scanning for devices...',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Make sure your PiHome device is powered on and nearby',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: FilledButton.tonal(
-            onPressed: () {
-              _bleScanBloc.add(const StartScan());
-            },
-            child: Text(
-              'Scan Again',
-              style: AppTextStyles.buttonMedium,
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.bluetooth_searching_rounded,
+                    size: 48,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Searching nearby...',
+                  style: AppTextStyles.headingSmall.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Looking for PiHome devices in range',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
@@ -157,47 +220,99 @@ class _DeviceScanViewState extends State<DeviceScanView> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, BleScanError state) {
+  Widget _buildCompleteState(BuildContext context, BleScanComplete state) {
     final theme = Theme.of(context);
+    final bool devicesFound = state.devices.isNotEmpty;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: .1),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Scanning Error',
-              style: AppTextStyles.headingSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.message,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: theme.colorScheme.error,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  devicesFound
+                      ? Icons.bluetooth_rounded
+                      : Icons.bluetooth_disabled_rounded,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.tonal(
-              onPressed: () {
-                _bleScanBloc.add(const StartScan());
-              },
-              child: Text(
-                'Try Again',
-                style: AppTextStyles.buttonMedium,
+              const SizedBox(width: 16),
+              Text(
+                devicesFound
+                    ? '${state.devices.length} ${state.devices.length == 1 ? 'device' : 'devices'} found'
+                    : 'No devices found',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        Expanded(
+          child: _buildDeviceList(context, state.devices),
+        ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.onSurface.withOpacity(0.05),
+                blurRadius: 24,
+                offset: const Offset(0, -8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _bleScanBloc.add(const StartScan());
+                  },
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onPrimary.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.refresh_rounded, size: 20),
+                  ),
+                  label: Text(devicesFound ? 'Scan Again' : 'Retry Scan'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -209,16 +324,30 @@ class _DeviceScanViewState extends State<DeviceScanView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.bluetooth_searching,
-              size: 64,
-              color: theme.colorScheme.outline,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.bluetooth_disabled_rounded,
+                size: 48,
+                color: theme.colorScheme.primary,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
-              'Searching for PiHome devices...',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: theme.colorScheme.outline,
+              'No PiHome devices found',
+              style: AppTextStyles.headingSmall.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Make sure your device is powered on\nand within range',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -228,13 +357,73 @@ class _DeviceScanViewState extends State<DeviceScanView> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       itemCount: devices.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final device = devices[index];
         return BleDeviceCard(device: device);
       },
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, BleScanError state) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.error.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Scanning Error',
+              style: AppTextStyles.headingSmall.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.message,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                _bleScanBloc.add(const StartScan());
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

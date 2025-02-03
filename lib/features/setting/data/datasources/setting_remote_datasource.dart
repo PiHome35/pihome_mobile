@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/config/config_path.dart';
@@ -33,18 +32,13 @@ class SettingRemoteDataSourceImpl implements SettingRemoteDataSource {
     required String refreshToken,
     required int expiresIn,
   }) async {
-    log('Creating spotify connection...');
-    log('accessToken: $accessToken');
-    log('accessTokenSpotify: $accessTokenSpotify');
-    log('refreshToken: $refreshToken');
-    log('expiresIn: $expiresIn');
     try {
       final response = await _dio.post(
         spotifyConnectionUrl,
         data: {
           "accessToken": accessTokenSpotify,
           "refreshToken": refreshToken,
-          "spotifyDeviceId": "1234",
+          "spotifyDeviceId": "test",
         },
         options: Options(
           headers: {
@@ -99,7 +93,6 @@ class SettingRemoteDataSourceImpl implements SettingRemoteDataSource {
       }
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 404) {
-        // throw Exception('Spotify connection not found');
         return null;
       } else {
         throw Exception(e.toString());

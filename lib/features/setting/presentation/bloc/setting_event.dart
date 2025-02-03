@@ -28,3 +28,13 @@ class GetSpotifyConnectEvent extends SettingEvent {
 class GetSettingLocalEvent extends SettingEvent {
   const GetSettingLocalEvent();
 }
+
+class GetChatAiModelsEvent extends SettingEvent {
+  const GetChatAiModelsEvent();
+}
+
+class UpdateSelectedAiModelEvent extends SettingEvent {
+  final String modelId;
+  final String modelKey;
+  const UpdateSelectedAiModelEvent(this.modelId, this.modelKey);
+}

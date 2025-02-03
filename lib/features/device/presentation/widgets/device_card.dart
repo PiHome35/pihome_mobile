@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_pihome/config/routes/routes.dart';
 import 'package:mobile_pihome/config/themes/text_styles.dart';
 import 'package:mobile_pihome/features/device/domain/entities/device_entity.dart';
 
@@ -25,7 +26,7 @@ class DeviceCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          // TODO: Handle device tap
+          AppRoutes.navigateToDeviceDetail(context, device);
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -52,13 +53,28 @@ class DeviceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      device.name,
-                      style: AppTextStyles.labelLarge.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            device.name,
+                            style: AppTextStyles.labelLarge.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (device.isMuted)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Icon(
+                              Icons.volume_off_rounded,
+                              size: 16,
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -80,37 +96,6 @@ class DeviceCard extends StatelessWidget {
                             color: theme.colorScheme.outline,
                           ),
                         ),
-                        if (device.groupId != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.folder_outlined,
-                                  size: 12,
-                                  color: theme.colorScheme.onSecondaryContainer,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  device.groupId ?? '',
-                                  style: AppTextStyles.deviceType.copyWith(
-                                    color:
-                                        theme.colorScheme.onSecondaryContainer,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ],

@@ -5,6 +5,7 @@ class BleDeviceModel extends BleDeviceEntity {
     required super.id,
     required super.name,
     required super.rssi,
+    required super.device,
   });
 
   BleDeviceEntity toEntity() {
@@ -12,6 +13,7 @@ class BleDeviceModel extends BleDeviceEntity {
       id: id,
       name: name,
       rssi: rssi,
+      device: device,
     );
   }
 }

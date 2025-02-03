@@ -1,14 +1,10 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_pihome/config/di/injection.dart';
-import 'package:mobile_pihome/core/services/spotify_auth_service.dart';
 import 'package:mobile_pihome/core/widgets/minimal_dialog.dart';
 import 'package:mobile_pihome/features/setting/domain/entities/setting_entity.dart';
 import 'package:mobile_pihome/features/setting/presentation/bloc/setting_bloc.dart';
 import 'package:mobile_pihome/features/setting/presentation/bloc/setting_event.dart';
-import 'package:mobile_pihome/features/setting/presentation/bloc/setting_state.dart';
 import 'package:mobile_pihome/features/setting/presentation/widgets/setting_item.dart';
 import 'package:mobile_pihome/features/setting/presentation/widgets/setting_section.dart';
 

@@ -79,11 +79,13 @@ class ChatRepositoryImpl implements IChatRepository {
   @override
   Future<GraphqlDataState<ChatEntity>> createNewChat({
     required String familyId,
+    required String name,
     required String token,
   }) async {
     try {
       final chat = await _remoteDataSource.createNewChat(
         familyId: familyId,
+        name: name,
         token: token,
       );
       return GraphqlDataSuccess(chat.toEntity());
@@ -116,8 +118,10 @@ class ChatRepositoryImpl implements IChatRepository {
         chatId: chatId,
         token: token,
       );
+      log('add message result: ${message.content}');
       return GraphqlDataSuccess(message.toEntity());
     } catch (e) {
+      log('add message error: $e');
       if (e is GraphQLException) {
         return GraphqlDataFailed(e);
       }
@@ -131,7 +135,6 @@ class ChatRepositoryImpl implements IChatRepository {
       );
     }
   }
-
 
   @override
   Stream<GraphqlDataState<MessageEntity?>> onMessageAdded({
@@ -177,6 +180,34 @@ class ChatRepositoryImpl implements IChatRepository {
             message: 'Failed to subscribe to chat updates',
             type: GraphQLErrorType.subscription,
           ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<GraphqlDataState<String>> deleteChat({
+    required String chatId,
+    required String token,
+  }) async {
+    try {
+      final deletedChatId = await _remoteDataSource.deleteChat(
+        chatId: chatId,
+        token: token,
+      );
+      log('deleted chat id: $deletedChatId');
+      return GraphqlDataSuccess(deletedChatId);
+    } catch (e) {
+      log('delete chat error: $e');
+      if (e is GraphQLException) {
+        return GraphqlDataFailed(e);
+      }
+      return GraphqlDataFailed(
+        GraphQLException(
+          message: 'Failed to delete chat',
+          type: e.toString().contains('UNAUTHENTICATED')
+              ? GraphQLErrorType.auth
+              : GraphQLErrorType.unknown,
         ),
       );
     }

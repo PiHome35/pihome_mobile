@@ -22,10 +22,10 @@ class GraphQLConfig {
       config: SocketClientConfig(
         initialPayload: () => {
           'Authorization': token != null ? 'Bearer $token' : '',
-          'protocol': 'graphql-ws',
         },
         autoReconnect: true,
         inactivityTimeout: const Duration(minutes: 30),
+        queryAndMutationTimeout: const Duration(seconds: 60),
         delayBetweenReconnectionAttempts: const Duration(seconds: 1),
       ),
     );

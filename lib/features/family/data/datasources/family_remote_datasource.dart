@@ -25,7 +25,10 @@ abstract class FamilyRemoteDataSource {
   });
   Future<FamilyModel> updateCurrentUserFamily({
     required String token,
+    String? name,
+    String? chatModelKey,
   });
+
   Future<FamilyModel> joinFamily({
     required String token,
     required String inviteCode,
@@ -194,9 +197,38 @@ class FamilyRemoteDataSourceImpl implements FamilyRemoteDataSource {
   }
 
   @override
-  Future<FamilyModel> updateCurrentUserFamily({required String token}) {
-    // TODO: implement updateCurrentUserFamily
-    throw UnimplementedError();
+  Future<FamilyModel> updateCurrentUserFamily({
+    required String token,
+    String? name,
+    String? chatModelKey,
+  }) async {
+    try {
+      final response = await _dio.put<Map<String, dynamic>>(
+        currentUserFamilyUrl,
+        data: {
+          'name': name,
+          'chatModelKey': chatModelKey,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        return FamilyModel.fromJson(response.data!);
+      } else {
+        throw ServerException();
+      }
+    } on DioException catch (e) {
+      log('[updateCurrentUserFamily] e: $e');
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw ConnectionTimeoutException();
+      } else {
+        throw ServerException();
+      }
+    }
   }
 
   @override

@@ -28,7 +28,6 @@ class BleDetailBloc extends Bloc<BleDetailEvent, BleDetailState> {
     try {
       emit(const BleDetailConnecting());
       await _repository.connect(event.device);
-
       await _servicesSubscription?.cancel();
       await emit.forEach<List<BleServiceEntity>>(
         _repository.discoverServices(),

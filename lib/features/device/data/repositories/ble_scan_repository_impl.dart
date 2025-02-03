@@ -13,11 +13,16 @@ class BleScanRepositoryImpl implements BleScanRepository {
   @override
   Stream<List<BleDeviceEntity>> scanForDevices() {
     return _bleLocalDataSource.scanDevices().map((devices) {
-      return devices.map((device) {
+      return devices
+          .where((device) => device.platformName
+              .toLowerCase()
+              .startsWith('pihome'.toLowerCase()))
+          .map((device) {
         return BleDeviceModel(
           id: device.remoteId.toString(),
           name: device.platformName,
           rssi: -1, // Default value until we get actual RSSI
+          device: device,
         );
       }).toList();
     });

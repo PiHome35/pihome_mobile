@@ -1,108 +1,147 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/core/resources/data_state.dart';
-import 'package:mobile_pihome/features/device/data/datasources/mock/device_group_mock_datasource.dart';
 import 'package:mobile_pihome/features/device/data/models/device_group_model.dart';
+import 'package:mobile_pihome/features/device/domain/entities/device_entity.dart';
 import 'package:mobile_pihome/features/device/domain/entities/device_group_entity.dart';
+import 'package:mobile_pihome/features/device/data/datasources/device_group_remote_datasource.dart';
 import 'package:mobile_pihome/features/device/domain/repositories/i_device_group_repository.dart';
 
 @LazySingleton(as: IDeviceGroupRepository)
 class DeviceGroupRepositoryImpl implements IDeviceGroupRepository {
-  final DeviceGroupMockDatasource _dataSource;
+  final DeviceGroupRemoteDatasource remoteDatasource;
 
-  DeviceGroupRepositoryImpl(this._dataSource);
+  DeviceGroupRepositoryImpl(this.remoteDatasource);
 
   @override
-  Future<DataState<List<DeviceGroupEntity>>> getDeviceGroups() async {
+  Future<DataState<List<DeviceGroupEntity>>> getDeviceGroups({
+    required String token,
+  }) async {
     try {
-      final result = await _dataSource.getDeviceGroups();
-      return DataSuccess(result);
+      final deviceGroups = await remoteDatasource.getDeviceGroups(token: token);
+      return DataSuccess(deviceGroups);
     } catch (e) {
-      return DataFailed(
-        DioException(
-          requestOptions: RequestOptions(path: ''),
-          error: e.toString(),
-        ),
-      );
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
     }
   }
 
   @override
-  Future<DataState<DeviceGroupEntity>> createDeviceGroup(
-      DeviceGroupEntity group) async {
+  Future<DataState<DeviceGroupEntity>> createDeviceGroup({
+    required String name,
+    required String token,
+  }) async {
     try {
-      final groupModel = DeviceGroupModel(
-        id: group.id,
-        name: group.name,
-        familyId: group.familyId,
-        createdAt: group.createdAt,
-        updatedAt: group.updatedAt,
-        icon: group.icon,
-        deviceIds: group.deviceIds,
+      final deviceGroup = await remoteDatasource.createDeviceGroup(
+        name: name,
+        token: token,
       );
-      final result = await _dataSource.createDeviceGroup(groupModel);
-      return DataSuccess(result);
+      return DataSuccess(deviceGroup);
     } catch (e) {
-      return DataFailed(
-        DioException(
-          requestOptions: RequestOptions(path: ''),
-          error: e.toString(),
-        ),
-      );
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
     }
   }
 
   @override
-  Future<DataState<DeviceGroupEntity>> updateDeviceGroup(
-      DeviceGroupEntity group) async {
+  Future<DataState<DeviceGroupEntity>> updateDeviceGroup({
+    required DeviceGroupEntity group,
+    required String token,
+  }) async {
     try {
-      final groupModel = DeviceGroupModel(
-        id: group.id,
-        name: group.name,
-        familyId: group.familyId,
-        createdAt: group.createdAt,
-        updatedAt: group.updatedAt,
-        icon: group.icon,
-        deviceIds: group.deviceIds,
+      final deviceGroup = await remoteDatasource.updateDeviceGroup(
+        deviceGroup: DeviceGroupModel.fromEntity(group),
+        token: token,
       );
-      final result = await _dataSource.updateDeviceGroup(groupModel);
-      return DataSuccess(result);
+      return DataSuccess(deviceGroup);
     } catch (e) {
-      return DataFailed(
-        DioException(
-          requestOptions: RequestOptions(path: ''),
-          error: e.toString(),
-        ),
-      );
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
     }
   }
 
   @override
-  Future<DataState<void>> deleteDeviceGroup(String groupId) async {
+  Future<DataState<void>> deleteDeviceGroup({
+    required String groupId,
+    required String token,
+  }) async {
     try {
-      await _dataSource.deleteDeviceGroup(groupId);
+      await remoteDatasource.deleteDeviceGroup(
+        id: groupId,
+        token: token,
+      );
       return const DataSuccess(null);
     } catch (e) {
-      return DataFailed(
-        DioException(
-          requestOptions: RequestOptions(path: ''),
-          error: e.toString(),
-        ),
-      );
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
     }
   }
 
   @override
-  Future<DataState<DeviceGroupEntity>> getDeviceGroup(String groupId) async {
+  Future<DataState<DeviceGroupEntity>> getDeviceGroup({
+    required String groupId,
+    required String token,
+  }) async {
     try {
-      final result = await _dataSource.getDeviceGroup(groupId);
-      return DataSuccess(result);
+      final deviceGroup = await remoteDatasource.getDeviceGroup(
+        id: groupId,
+        token: token,
+      );
+      log('deviceGroup: $deviceGroup');
+      return DataSuccess(deviceGroup);
+    } catch (e) {
+      log('error: $e');
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
+    }
+  }
+
+  @override
+  Future<DataState<List<DeviceEntity>>> addDevicesToGroup(
+      {required String token,
+      required String groupId,
+      required List<String> deviceIds}) async {
+    try {
+      final devices = await remoteDatasource.addDevicesToGroup(
+        token: token,
+        groupId: groupId,
+        deviceIds: deviceIds,
+      );
+      return DataSuccess(devices.map((device) => device.toEntity()).toList());
+    } catch (e) {
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
+    }
+  }
+
+  @override
+  Future<DataState<List<DeviceEntity>>> getDevicesInGroup({
+    required String token,
+    required String groupId,
+  }) async {
+    try {
+      final devices = await remoteDatasource.getDevicesInGroup(
+        token: token,
+        groupId: groupId,
+      );
+      return DataSuccess(devices.map((device) => device.toEntity()).toList());
+    } catch (e) {
+      return DataFailed(DioException(requestOptions: RequestOptions(path: '')));
+    }
+  }
+
+  @override
+  Future<DataState<List<DeviceEntity>>> removeDevicesFromGroup({
+    required String token,
+    required String groupId,
+    required List<String> deviceIds,
+  }) async {
+    try {
+      final devices = await remoteDatasource.removeDevicesFromGroup(
+        token: token,
+        groupId: groupId,
+        deviceIds: deviceIds,
+      );
+      return DataSuccess(devices.map((device) => device.toEntity()).toList());
     } catch (e) {
       return DataFailed(
-        DioException(
-          requestOptions: RequestOptions(path: ''),
-          error: e.toString(),
-        ),
+        DioException(requestOptions: RequestOptions(path: '')),
       );
     }
   }

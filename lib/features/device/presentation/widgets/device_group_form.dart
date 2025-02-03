@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_pihome/config/themes/text_styles.dart';
+import 'package:mobile_pihome/features/device/domain/entities/device_entity.dart';
 import 'package:mobile_pihome/features/device/domain/entities/device_group_entity.dart';
 
 class DeviceGroupForm extends StatefulWidget {
   final DeviceGroupEntity? initialGroup;
   final String familyId;
-  final Function(String name, List<String> deviceIds) onSubmit;
+  final Function(String name, List<DeviceEntity> devices) onSubmit;
 
   const DeviceGroupForm({
     super.key,
@@ -20,7 +21,7 @@ class DeviceGroupForm extends StatefulWidget {
 
 class _DeviceGroupFormState extends State<DeviceGroupForm> {
   late final TextEditingController _nameController;
-  final List<String> _selectedDeviceIds = [];
+  final Set<DeviceEntity> _selectedDevices = {};
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -28,7 +29,7 @@ class _DeviceGroupFormState extends State<DeviceGroupForm> {
     super.initState();
     _nameController = TextEditingController(text: widget.initialGroup?.name);
     if (widget.initialGroup != null) {
-      _selectedDeviceIds.addAll(widget.initialGroup!.deviceIds);
+      _selectedDevices.addAll(widget.initialGroup!.devices);
     }
   }
 
@@ -40,7 +41,7 @@ class _DeviceGroupFormState extends State<DeviceGroupForm> {
 
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
-      widget.onSubmit(_nameController.text, _selectedDeviceIds);
+      widget.onSubmit(_nameController.text, _selectedDevices.toList());
     }
   }
 

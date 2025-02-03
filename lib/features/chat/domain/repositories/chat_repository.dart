@@ -17,6 +17,7 @@ abstract class IChatRepository {
   });
   Future<GraphqlDataState<ChatEntity>> createNewChat({
     required String familyId,
+    required String name,
     required String token,
   });
   Future<GraphqlDataState<MessageEntity>> addMessage({
@@ -26,12 +27,16 @@ abstract class IChatRepository {
     required String token,
   });
 
-
   Stream<GraphqlDataState<MessageEntity?>> onMessageAdded({
     required String chatId,
     required String token,
   });
   Stream<GraphqlDataState<ChatEntity>> onChatCreated({
+    required String token,
+  });
+
+  Future<GraphqlDataState<String>> deleteChat({
+    required String chatId,
     required String token,
   });
 }

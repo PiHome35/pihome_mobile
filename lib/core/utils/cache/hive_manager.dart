@@ -7,18 +7,14 @@ class HiveManager {
   // Private constructor
   HiveManager._();
 
-  // Singleton instance
   static final HiveManager _instance = HiveManager._();
 
-  // Factory constructor
   factory HiveManager() => _instance;
 
-  // Private box instances
   late Box<DeviceModel> _deviceBox;
   late Box<UserModel> _userBox;
   late Box<SettingModel> _settingBox;
 
-  // Public getters
   Box<DeviceModel> get deviceBox => _deviceBox;
   Box<UserModel> get userBox => _userBox;
   Box<SettingModel> get settingBox => _settingBox;

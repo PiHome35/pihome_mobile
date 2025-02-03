@@ -1,5 +1,7 @@
+import 'package:mobile_pihome/features/family/domain/entities/chat_ai_entity.dart';
 import 'package:mobile_pihome/features/setting/domain/entities/setting_entity.dart';
 import 'package:mobile_pihome/features/setting/domain/entities/spotify_connection_entity.dart';
+import 'package:mobile_pihome/features/family/data/models/chat_ai_model.dart';
 
 sealed class SettingState {
   const SettingState();
@@ -15,13 +17,30 @@ class SettingLoading extends SettingState {
 
 class SettingLoaded extends SettingState {
   final SettingEntity setting;
-  // final SpotifyConnectionEntity spotifyConnection;
-  const SettingLoaded(
-    this.setting,
-    // this.spotifyConnection,
-  );
-}
+  final List<ChatAiModelEntity>? chatModels;
+  final bool isModelUpdateSuccess;
 
+  const SettingLoaded(
+    this.setting, {
+    this.chatModels,
+    this.isModelUpdateSuccess = false,
+  });
+
+  @override
+  List<Object?> get props => [setting, isModelUpdateSuccess];
+
+  SettingLoaded copyWith({
+    SettingEntity? setting,
+    List<ChatAiModelEntity>? chatModels,
+    bool? isModelUpdateSuccess,
+  }) {
+    return SettingLoaded(
+      setting ?? this.setting,
+      chatModels: chatModels ?? this.chatModels,
+      isModelUpdateSuccess: isModelUpdateSuccess ?? this.isModelUpdateSuccess,
+    );
+  }
+}
 
 class SettingError extends SettingState {
   final String message;

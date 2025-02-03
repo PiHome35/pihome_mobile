@@ -4,8 +4,8 @@ sealed class LocalDeviceEvent {
   const LocalDeviceEvent();
 }
 
-final class FetchCachedDevices extends LocalDeviceEvent {
-  const FetchCachedDevices();
+final class GetCachedDevices extends LocalDeviceEvent {
+  const GetCachedDevices();
 }
 
 final class UpdateCachedDevice extends LocalDeviceEvent {

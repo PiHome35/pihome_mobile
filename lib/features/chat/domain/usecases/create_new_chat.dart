@@ -7,9 +7,10 @@ import 'package:mobile_pihome/features/chat/domain/repositories/chat_repository.
 
 class CreateNewChatParams {
   final String familyId;
+  final String name;
   final String token;
 
-  CreateNewChatParams({required this.familyId, required this.token});
+  CreateNewChatParams({required this.familyId, required this.name, required this.token});
 }
 
 @injectable
@@ -24,6 +25,7 @@ class CreateNewChatUseCase
       CreateNewChatParams params) async {
     return _chatRepository.createNewChat(
       familyId: params.familyId,
+      name: params.name,
       token: params.token,
     );
   }

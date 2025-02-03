@@ -19,7 +19,7 @@ class MinimalDialog extends StatelessWidget {
   final bool showCloseButton;
   final DialogType type;
   final IconData? icon;
-
+  // final bool? barrierDismissible;
   const MinimalDialog({
     super.key,
     required this.title,
@@ -31,6 +31,7 @@ class MinimalDialog extends StatelessWidget {
     this.showCloseButton = true,
     this.type = DialogType.normal,
     this.icon,
+    // this.barrierDismissible = true,
   });
 
   Color get _iconColor {
@@ -160,6 +161,7 @@ class MinimalDialog extends StatelessWidget {
       ),
       elevation: 0,
       backgroundColor: Colors.white,
+      // barrierDismissible: barrierDismissible,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 400.w,
@@ -230,9 +232,11 @@ class MinimalDialog extends StatelessWidget {
     bool showCloseButton = true,
     DialogType type = DialogType.normal,
     IconData? icon,
+    bool? barrierDismissible = true,
   }) {
     return showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => MinimalDialog(
         title: title,
         message: message,
@@ -244,6 +248,7 @@ class MinimalDialog extends StatelessWidget {
         showCloseButton: showCloseButton,
         type: type,
         icon: icon,
+        // barrierDismissible: true,
       ),
     );
   }

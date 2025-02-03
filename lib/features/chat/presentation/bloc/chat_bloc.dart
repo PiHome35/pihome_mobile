@@ -12,6 +12,7 @@ import 'package:mobile_pihome/features/chat/domain/usecases/subscribe_to_message
 import 'chat_event.dart';
 import 'chat_state.dart';
 import 'package:mobile_pihome/core/resources/graphql_data_state.dart';
+import 'package:mobile_pihome/features/chat/domain/usecases/delete_chat_usecase.dart';
 
 @injectable
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -21,6 +22,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final AddMessageUseCase _addMessageUseCase;
   final CreateNewChatUseCase _createNewChatUseCase;
   final SubscribeToMessagesUseCase _subscribeToMessagesUseCase;
+  final DeleteChatUseCase _deleteChatUseCase;
 
   StreamSubscription<GraphqlDataState<MessageEntity?>>? _messageSubscription;
   StreamSubscription? _chatSubscription;
@@ -32,6 +34,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     this._addMessageUseCase,
     this._subscribeToMessagesUseCase,
     this._createNewChatUseCase,
+    this._deleteChatUseCase,
   ) : super(const ChatInitial()) {
     on<GetAllChats>(_onGetAllChats);
     on<GetChatMessages>(_onGetChatMessages);
@@ -44,6 +47,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<CreateNewChat>(_onCreateNewChat);
     on<CreatedNewChat>(_onCreatedNewChat);
     on<LoadMoreMessages>(_onLoadMoreMessages);
+    on<DeleteChat>(_onDeleteChat);
   }
 
   Future<void> _onGetAllChats(
@@ -86,7 +90,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ),
     );
     if (result.data != null) {
-      emit(MessagesLoaded(messages: result.data!));
+      List<MessageEntity> messages = List.from(result.data!);
+      // messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      emit(MessagesLoaded(messages: messages.reversed.toList()));
     } else {
       emit(ChatError(message: result.error.toString()));
     }
@@ -94,34 +100,57 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   Future<void> _onSendMessage(
       SendMessage event, Emitter<ChatState> emit) async {
-    final token = await _getStorageTokenUseCase.execute();
-    if (token.isEmpty) {
-      emit(const ChatError(message: 'No token found'));
-      return;
-    }
-
-    final currentState = state;
-    if (currentState is MessagesLoaded) {
-      final currentMessages = List<MessageEntity>.from(currentState.messages);
-      log('currentMessages: ${currentMessages.length}');
-      log('currentMessages: ${currentMessages.last.content}');
-
-      final result = await _addMessageUseCase.execute(
-        AddMessageParams(
-          content: event.content,
-          senderId: event.senderId,
-          chatId: event.chatId,
-          token: token,
-        ),
-      );
-      log('onsend message result: ${result.data?.content}');
-
-      if (result.data != null) {
-        currentMessages.add(result.data!);
-        emit(MessagesLoaded(messages: currentMessages));
-      } else {
-        emit(ChatError(message: result.error.toString()));
+    try {
+      final token = await _getStorageTokenUseCase.execute();
+      if (token.isEmpty) {
+        emit(const ChatError(message: 'No token found'));
+        return;
       }
+
+      final currentState = state;
+      if (currentState is MessagesLoaded) {
+        final currentMessages = List<MessageEntity>.from(currentState.messages);
+
+        log('currentMessages: ${currentMessages.length}');
+        if (currentMessages.isNotEmpty) {
+          log('currentMessages: ${currentMessages.last.content}');
+        }
+
+        // Add timeout to the operation
+        final result = await _addMessageUseCase.execute(
+          AddMessageParams(
+            content: event.content,
+            senderId: event.senderId,
+            chatId: event.chatId,
+            token: token,
+          ),
+        );
+
+        log('onsend message result: ${result.data?.content}');
+
+        if (result.data != null) {
+          currentMessages.add(result.data!);
+          emit(MessagesLoaded(
+            messages: currentMessages,
+            currentOffset: currentState.currentOffset,
+            hasMoreMessages: currentState.hasMoreMessages,
+            isLoadingMore: false,
+          ));
+        } else {
+          log('onsend message error: ${result.error}');
+          emit(ChatError(
+            message: result.error?.toString() ?? 'Failed to send message',
+          ));
+        }
+      }
+    } catch (e) {
+      log('Send message error: $e');
+      String errorMessage = 'Failed to send message';
+      if (e is TimeoutException) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection and try again.';
+      }
+      emit(ChatError(message: errorMessage));
     }
   }
 
@@ -149,7 +178,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (initialMessages.data != null) {
         messages = List.from(initialMessages.data!);
         emit(MessagesLoaded(
-          messages: messages,
+          messages: messages.reversed.toList(),
           currentOffset: 20,
           hasMoreMessages: initialMessages.data!.length >= 20,
         ));
@@ -252,6 +281,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final result = await _createNewChatUseCase.execute(
       CreateNewChatParams(
         familyId: event.familyId,
+        name: event.name,
         token: token,
       ),
     );
@@ -288,6 +318,40 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       StopChatSubscription event, Emitter<ChatState> emit) async {
     await _chatSubscription?.cancel();
     _chatSubscription = null;
+  }
+
+  Future<void> _onDeleteChat(DeleteChat event, Emitter<ChatState> emit) async {
+    try {
+      final token = await _getStorageTokenUseCase.execute();
+      if (token.isEmpty) {
+        emit(const ChatError(message: 'No token found'));
+        return;
+      }
+
+      final result = await _deleteChatUseCase.execute(
+        DeleteChatParams(
+          chatId: event.chatId,
+          token: token,
+        ),
+      );
+
+      if (result.data != null) {
+        emit(ChatDeleted(result.data!));
+
+        final currentState = state;
+        if (currentState is ChatsLoaded) {
+          final updatedChats = currentState.chats
+              .where((chat) => chat.id != event.chatId)
+              .toList();
+          emit(ChatsLoaded(updatedChats));
+        }
+      } else {
+        emit(ChatError(message: result.error.toString()));
+      }
+    } catch (e) {
+      log('Delete chat error: $e');
+      emit(const ChatError(message: 'Failed to delete chat'));
+    }
   }
 
   @override

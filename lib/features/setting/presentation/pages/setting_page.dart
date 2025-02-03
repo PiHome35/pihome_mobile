@@ -3,14 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_pihome/config/di/injection.dart';
-import 'package:mobile_pihome/config/routes/routes.dart';
 import 'package:mobile_pihome/config/themes/text_styles.dart';
 import 'package:mobile_pihome/core/presentation/bloc/local/user_local_bloc.dart';
 import 'package:mobile_pihome/core/presentation/bloc/local/user_local_event.dart';
 import 'package:mobile_pihome/core/presentation/bloc/local/user_local_state.dart';
-import 'package:mobile_pihome/features/family/presentation/bloc/family_setting/family_setting_bloc.dart';
-import 'package:mobile_pihome/features/family/presentation/bloc/family_setting/family_setting_event.dart';
-import 'package:mobile_pihome/features/family/presentation/bloc/family_setting/family_setting_state.dart';
 import 'package:mobile_pihome/features/setting/presentation/bloc/setting_bloc.dart';
 import 'package:mobile_pihome/features/setting/presentation/bloc/setting_event.dart';
 import 'package:mobile_pihome/features/setting/presentation/bloc/setting_state.dart';
@@ -31,8 +27,9 @@ class SettingPage extends StatelessWidget {
               getIt<UserLocalBloc>()..add(const GetCachedUserEvent()),
         ),
         BlocProvider(
-          create: (context) =>
-              getIt<SettingBloc>()..add(const GetSettingEvent()),
+          create: (context) => getIt<SettingBloc>()
+            ..add(const GetSettingEvent())
+            ..add(const GetChatAiModelsEvent()),
         ),
       ],
       child: const SettingView(),
@@ -63,40 +60,67 @@ class SettingView extends StatelessWidget {
       body: BlocConsumer<SettingBloc, SettingState>(
         listener: (context, state) {
           if (state is SettingError) {
-            // showSnackBar(context, state.message);
             log('[SettingPage] state: $state');
           }
         },
         builder: (context, state) {
-          if (state is SettingLoading) {
+          final userState = context.read<UserLocalBloc>().state;
+          if (state is SettingLoading && userState is UserLocalLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (state is SettingError) {
             return Center(
-              child: Text(
-                state.message,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    state.message,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () {
+                      context.read<SettingBloc>().add(const GetSettingEvent());
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
               ),
             );
           }
 
-          if (state is SettingLoaded) {
+          if (state is SettingLoaded && userState is UserLocalLoaded) {
             final setting = state.setting;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FamilySettingsSection(
-                  familyName: setting.familyName ?? '',
+            final chatModels = state.chatModels;
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<SettingBloc>()
+                  ..add(const GetSettingEvent())
+                  ..add(const GetChatAiModelsEvent());
+                context.read<UserLocalBloc>().add(const GetCachedUserEvent());
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FamilySettingsSection(
+                      familyName: setting.familyName ?? '',
+                      userId: userState.user.id,
+                    ),
+                    const AccountSettingsSection(),
+                    AIModelSettingsSection(
+                      chatModels: chatModels ?? [],
+                      settingBloc: context.read<SettingBloc>(),
+                    ),
+                    IntegrationsSettingsSection(setting: setting),
+                  ],
                 ),
-                const AccountSettingsSection(),
-                const AIModelSettingsSection(),
-                IntegrationsSettingsSection(setting: setting),
-              ],
               ),
             );
           }

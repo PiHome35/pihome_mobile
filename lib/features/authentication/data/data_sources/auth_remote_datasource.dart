@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:mobile_pihome/config/config_path.dart';
 import 'package:mobile_pihome/core/error/exception.dart';
 import 'package:mobile_pihome/features/authentication/data/models/auth_user_model.dart';
+import 'package:mobile_pihome/features/authentication/data/models/register_device_response_model.dart';
 import 'package:mobile_pihome/features/authentication/data/models/token_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -19,6 +20,12 @@ abstract class AuthRemoteDataSource {
   });
   Future<AuthUserModel> getMe({
     required String accessToken,
+  });
+  Future<RegisterDeviceResponseModel> registerDevice({
+    required String accessToken,
+    required String clientId,
+    required String macAddress,
+    required String name,
   });
 }
 
@@ -110,5 +117,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       ),
     );
     return AuthUserModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<RegisterDeviceResponseModel> registerDevice({
+    required String accessToken,
+    required String clientId,
+    required String macAddress,
+    required String name,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      registerDeviceUrl,
+      data: {
+        'clientId': clientId,
+        'macAddress': macAddress,
+        'name': name,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+    if (response.statusCode == 201) {
+      return RegisterDeviceResponseModel.fromJson(response.data!);
+    } else {
+      throw ServerException();
+    }
   }
 }

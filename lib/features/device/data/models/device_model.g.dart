@@ -18,33 +18,48 @@ class DeviceModelAdapter extends TypeAdapter<DeviceModel> {
     };
     return DeviceModel(
       id: fields[0] as String,
-      name: fields[1] as String,
-      familyId: fields[2] as String,
-      createdAt: fields[3] as String,
-      updatedAt: fields[4] as String,
-      groupId: fields[5] as String?,
+      clientId: fields[1] as String,
+      macAddress: fields[2] as String,
+      name: fields[3] as String,
+      familyId: fields[4] as String,
+      deviceGroupId: fields[5] as String?,
       isOn: fields[6] as bool,
+      isMuted: fields[7] as bool,
+      volumePercent: fields[8] as int,
+      isSoundServer: fields[9] as bool,
+      createdAt: fields[10] as String,
+      updatedAt: fields[11] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, DeviceModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.name)
+      ..write(obj.clientId)
       ..writeByte(2)
-      ..write(obj.familyId)
+      ..write(obj.macAddress)
       ..writeByte(3)
-      ..write(obj.createdAt)
+      ..write(obj.name)
       ..writeByte(4)
-      ..write(obj.updatedAt)
+      ..write(obj.familyId)
       ..writeByte(5)
-      ..write(obj.groupId)
+      ..write(obj.deviceGroupId)
       ..writeByte(6)
-      ..write(obj.isOn);
+      ..write(obj.isOn)
+      ..writeByte(7)
+      ..write(obj.isMuted)
+      ..writeByte(8)
+      ..write(obj.volumePercent)
+      ..writeByte(9)
+      ..write(obj.isSoundServer)
+      ..writeByte(10)
+      ..write(obj.createdAt)
+      ..writeByte(11)
+      ..write(obj.updatedAt);
   }
 
   @override

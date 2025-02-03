@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:mobile_pihome/features/device/domain/entities/device_entity.dart';
-import 'package:mobile_pihome/features/device/domain/usecases/cache_devices.dart';
-import 'package:mobile_pihome/features/device/domain/usecases/get_cache_devices.dart';
-import 'package:mobile_pihome/features/device/domain/usecases/update_cached_device.dart';
+import 'package:mobile_pihome/features/device/domain/usecases/device/local/cache_devices.dart';
+import 'package:mobile_pihome/features/device/domain/usecases/device/local/get_cached_devices.dart';
+import 'package:mobile_pihome/features/device/domain/usecases/device/local/update_cached_device.dart';
+import 'package:mobile_pihome/features/device/domain/usecases/device/local/update_cached_devices.dart';
 import 'package:mobile_pihome/features/device/presentation/bloc/local/device_local_event.dart';
 import 'package:mobile_pihome/features/device/presentation/bloc/local/device_local_state.dart';
 
@@ -14,20 +14,22 @@ class LocalDeviceBloc extends Bloc<LocalDeviceEvent, LocalDeviceState> {
   final CacheDevicesUseCase _cacheDevicesUseCase;
   final GetCachedDevicesUseCase _getCachedDevicesUseCase;
   final UpdateCachedDeviceUseCase _updateCachedDeviceUseCase;
-
+  final UpdateCachedDevicesUseCase _updateCachedDevicesUseCase;
+  
   LocalDeviceBloc(
     this._cacheDevicesUseCase,
     this._getCachedDevicesUseCase,
     this._updateCachedDeviceUseCase,
+    this._updateCachedDevicesUseCase,
   ) : super(const LocalDeviceInitial()) {
-    on<FetchCachedDevices>(_onFetchCachedDevices);
+    on<GetCachedDevices>(_onGetCachedDevices);
     on<UpdateCachedDevice>(_onUpdateCachedDevice);
     on<DeleteCachedDevices>(_onDeleteCachedDevices);
     on<CacheDevices>(_onCacheDevices);
   }
 
-  Future<void> _onFetchCachedDevices(
-    FetchCachedDevices event,
+  Future<void> _onGetCachedDevices(
+    GetCachedDevices event,
     Emitter<LocalDeviceState> emit,
   ) async {
     try {

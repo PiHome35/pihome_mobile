@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:mobile_pihome/config/routes/routes.dart';
 import 'package:mobile_pihome/config/themes/text_styles.dart';
 import 'package:mobile_pihome/features/device/domain/entities/ble_device_entity.dart';
 
@@ -21,7 +21,8 @@ class BleDeviceCard extends StatelessWidget {
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest,
       child: InkWell(
-        onTap: () => context.push('/device/detail', extra: device),
+        onTap: () => AppRoutes.navigateToDeviceBleDetail(context, device),
+        // onTap: () => AppRoutes.navigateToDeviceSetup(context, device),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

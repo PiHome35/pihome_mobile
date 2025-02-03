@@ -8,7 +8,6 @@ import 'package:mobile_pihome/features/family/domain/usecases/delete_invite_code
 import 'package:mobile_pihome/features/family/domain/usecases/get_family_detail.dart';
 import 'package:mobile_pihome/features/family/domain/usecases/list_user_family.dart';
 import 'package:mobile_pihome/features/family/presentation/bloc/family_setting/family_setting_state.dart';
-import 'package:mobile_pihome/features/family/presentation/bloc/family_state.dart';
 import 'package:mobile_pihome/features/family/presentation/bloc/family_setting/family_setting_event.dart';
 
 @injectable

@@ -1,3 +1,4 @@
+import 'package:mobile_pihome/features/device/domain/entities/device_entity.dart';
 import 'package:mobile_pihome/features/device/domain/entities/device_group_entity.dart';
 
 class DeviceGroupModel extends DeviceGroupEntity {
@@ -7,9 +8,20 @@ class DeviceGroupModel extends DeviceGroupEntity {
     required super.familyId,
     required super.createdAt,
     required super.updatedAt,
-    super.icon,
-    required super.deviceIds,
+    required super.devices,
   });
+
+
+  factory DeviceGroupModel.fromEntity(DeviceGroupEntity entity) {
+    return DeviceGroupModel(
+      id: entity.id,
+      name: entity.name,
+      familyId: entity.familyId,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      devices: entity.devices,
+    );
+  }
 
   factory DeviceGroupModel.fromJson(Map<String, dynamic> json) {
     return DeviceGroupModel(
@@ -18,9 +30,7 @@ class DeviceGroupModel extends DeviceGroupEntity {
       familyId: json['familyId'] as String,
       createdAt: json['createdAt'] as String,
       updatedAt: json['updatedAt'] as String,
-      icon: json['icon'] as String?,
-      deviceIds:
-          (json['deviceIds'] as List<dynamic>).map((e) => e as String).toList(),
+      devices: const [],
     );
   }
 
@@ -31,10 +41,36 @@ class DeviceGroupModel extends DeviceGroupEntity {
       'familyId': familyId,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      'icon': icon,
-      'deviceIds': deviceIds,
+      'devices': devices,
     };
   }
 
-  DeviceGroupEntity toEntity() => this;
+  DeviceGroupModel addDevices({required List<DeviceEntity> devices}) {
+    return DeviceGroupModel(
+      id:  id,
+      name: name,
+      familyId: familyId,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      devices: devices,
+    );
+  }
+
+  DeviceGroupModel copyWith({
+    String? id,
+    String? name,
+    String? familyId,
+    String? createdAt,
+    String? updatedAt,
+    List<DeviceEntity>? devices,
+  }) {
+    return DeviceGroupModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      familyId: familyId ?? this.familyId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      devices: devices ?? this.devices,
+    );
+  }
 }
